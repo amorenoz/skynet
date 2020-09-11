@@ -33,7 +33,7 @@ info() {
 do_clean() {
     info "Cleaning working directory"
     rm -rf $WORKDIR
-    rm 
+    docker rmi ovn-kube-f
 }
 
 do_create () {
@@ -77,7 +77,8 @@ EOF
       popd
 
       info "Disable SCTPSupport"
-      sed -i 's/SCTPSupport: true/SCTPSupport: false/' contrib/kind.yaml.j2
+      sed -i '/SCTPSupport.*/d' contrib/kind.yaml.j2
+      sed -i '/featureGates.*/d' contrib/kind.yaml.j2
     popd # ovn-kubernetes
 
     info "Gettin Skydive"
