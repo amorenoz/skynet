@@ -1,0 +1,160 @@
+#!/bin/bash
+set -e
+
+# GLOBAL_VARS
+SCRIPT=`realpath -s $0`
+SCRIPTPATH=`dirname $SCRIPT`
+WORKDIR="$PWD/fdp-skydive"
+K8S_VERSION=v1.14.10
+
+usage(){
+    echo "Usage: $0 [options] command [command options]"
+    echo ""
+    echo "commands:"
+    echo "  create:         Create a Lab instance with KIND + OVS + SKYDIVE"
+    echo "  clean:          Clean up the lab"
+    echo "  up:             Start the lab"
+    echo "  down:           Stop the lab"
+    echo ""
+    echo "general options:"
+    echo "  -h:             Display this help message"
+    echo "  -v:             Be verbose"
+    echo "  -w WORKDIR:     Use the specified path as working directory. Default \$PWD/fdp-skydive/"
+}
+
+error() {
+    echo "[error] $@"
+}
+
+info() {
+    echo "[info] $@"
+}
+
+do_clean() {
+    info "Cleaning working directory"
+    rm -rf $WORKDIR
+    rm 
+}
+
+do_create () {
+    # Check docker is installed and running
+    docker version > /dev/null || (error "Docker not installed"; exit 1)
+    # Check go is installed
+    go version > /dev/null || (error "Docker not installed"; exit 1)
+
+    # Get Kind
+    info "Getting KIND"
+    curl -Lo $WORKDIR/kind "https://kind.sigs.k8s.io/dl/v0.8.1/kind-$(uname)-amd64"
+    chmod +x $WORKDIR/kind
+    export PATH="$PATH:$WORKDIR"
+
+    info "Installing kubectl"
+    which kubectl >/dev/null || (
+    cat > /etc/yum.repos.d/kubernetes.repo <<EOF 
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+    sudo dnf install -y kubectl 
+    )
+
+    info "Opening port 11337 in the firewall"
+    sudo firewall-cmd --add-port=11337/tcp
+    sudo firewall-cmd --reload
+    
+    info "Building ovn-k8s"
+    go get github.com/ovn-org/ovn-kubernetes | true
+    pushd $GOPATH/src/github.com/ovn-org/ovn-kubernetes
+      pushd go-controller
+      make
+      popd
+      pushd dist/images
+      make fedora
+      popd
+
+      info "Disable SCTPSupport"
+      sed -i 's/SCTPSupport: true/SCTPSupport: false/' contrib/kind.yaml.j2
+    popd # ovn-kubernetes
+
+    info "Gettin Skydive"
+    pushd $WORKDIR
+      git clone https://github.com/amorenoz/skydive.git
+      pushd skydive
+        git checkout poc-ovn
+      popd
+    popd 
+    
+}
+
+do_up() {
+    info "Starting kind + ovn"
+    pushd "$GOPATH/src/github.com/ovn-org/ovn-kubernetes/contrib"
+    (
+        K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh
+    )
+    popd
+}
+
+do_down () {
+    echo "Stopping the lab"
+    if kind get clusters | grep -q ovn  ; then
+        kind delete cluster --name ovn
+    fi
+
+}
+
+## Main
+while getopts "hvw:" opt; do
+    case ${opt} in
+        h )
+            usage
+            exit 0
+            ;;
+        v )
+            set -x
+            ;;
+        w )
+            WORKDIR=$(realpath $OPTARG)
+            ;;
+        \? )
+            echo "Invalid option: -$OPTARG" 1>&2
+            exit 1
+            ;;
+    esac
+done
+
+# Get command
+shift $((OPTIND -1))
+CMD=$1
+if [ -z "${CMD}" ]; then
+    usage
+    exit 1
+fi
+shift
+
+# Common initialization
+mkdir -p "$WORKDIR" > /dev/null || true
+export GOPATH=$WORKDIR/go
+
+case $CMD in
+    up)
+        do_up $@
+        ;;
+    down)
+        do_down $@
+        ;;
+    create)
+        do_create $@
+        ;;
+    clean)
+        do_clean $@
+        ;;
+    *)
+        echo "Invalid command $CMD" 1>&2
+        exit 1
+        ;;
+esac
