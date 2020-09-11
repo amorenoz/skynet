@@ -28,6 +28,14 @@ Note it will ask you for your sudo password for some operations (opening a port 
     skylab up
 
 
+### Access the Skydive UI
+
+    skylab forward &
+    skydive kibana
+
+Now you can access Skydive UI at localhost:8082 and Kibana dashboard at localhost:5601
+
+
 ### Stop the lab
 
     skylab down
@@ -35,3 +43,4 @@ Note it will ask you for your sudo password for some operations (opening a port 
 ### Clean the lab
 
     skylab up
+

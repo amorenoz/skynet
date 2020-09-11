@@ -15,6 +15,8 @@ usage(){
     echo "  clean:          Clean up the lab"
     echo "  up:             Start the lab"
     echo "  down:           Stop the lab"
+    echo "  forward:        Foward the UI ports (needed for Skydive UI and Kibana dashboard)"
+    echo "  kibana:         Start a Kibana container to inspect the ElasticSearch database directly"
     echo ""
     echo "general options:"
     echo "  -h:             Display this help message"
@@ -34,6 +36,8 @@ do_clean() {
     info "Cleaning working directory"
     rm -rf $WORKDIR
     docker rmi ovn-kube-f
+    info "Removing kubeconfig"
+    rm -f $HOME/admin.conf
 }
 
 do_create () {
@@ -98,14 +102,39 @@ do_up() {
         K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh
     )
     popd
+    info "Deploying skydive"
+    export KUBECONFIG=$HOME/admin.conf
+    kubectl apply -f $WORKDIR/skydive/contrib/kubernetes/skydive.yaml
+    info "Waiting 10s until skydive gets deployed"
+    sleep 10
+    info "Skydive should be ready"
+    echo ""
+    info "Access your cluster by adding the following variable to your env:"
+    info "export KUBECONFIG=$HOME/admin.conf"
 }
 
-do_down () {
+do_down() {
     echo "Stopping the lab"
-    if kind get clusters | grep -q ovn  ; then
-        kind delete cluster --name ovn
-    fi
+    pushd "$GOPATH/src/github.com/ovn-org/ovn-kubernetes/contrib"
+    (
+        K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh --delete
+    )
+    popd
+    docker stop skydive-kibana > /dev/null || true
+    docker rm skydive-kibana > /dev/null || true
+}
 
+do_forward() {
+    export KUBECONFIG=$HOME/admin.conf
+    info "Forwaring UI ports. You can access the UI on localhost:8082"
+    info "Feel free to move this process to the background..."
+    kubectl port-forward --namespace ovn-kubernetes service/skydive-analyzer 8082 9200
+}
+
+do_kibana() {
+    info "Starting Kibana Container"
+    docker run -d --network="host" --name skydive-kibana --env ELASTICSEARCH_HOSTS="http://localhost:9200" -p 5601:5601 docker.elastic.co/kibana/kibana:7.8.0
+    info "...done. Kibana dashboard should be accessible (in around 30s) at localhost:5601"
 }
 
 ## Main
@@ -153,6 +182,12 @@ case $CMD in
         ;;
     clean)
         do_clean $@
+        ;;
+    forward)
+        do_forward $@
+        ;;
+    kibana)
+        do_kibana $@
         ;;
     *)
         echo "Invalid command $CMD" 1>&2
