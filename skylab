@@ -86,11 +86,13 @@ EOF
       sed -i '/featureGates.*/d' contrib/kind.yaml.j2
     popd # ovn-kubernetes
 
-    info "Gettin Skydive"
+    info "Getting Skydive"
     pushd $WORKDIR
       git clone https://github.com/amorenoz/skydive.git
       pushd skydive
         git checkout poc-ovn
+        info "Building skydive from source takes too long. Downloading the binary to use it as client"
+        curl -Lo - https://github.com/skydive-project/skydive-binaries/raw/jenkins-builds/skydive-latest.gz | gzip -d > skydive && chmod +x skydive
       popd
     popd 
     
@@ -112,6 +114,8 @@ do_up() {
     echo ""
     info "Access your cluster by adding the following variable to your env:"
     info "export KUBECONFIG=$HOME/admin.conf"
+    echo ""
+    info "The skydive binary is in $WORKDIR/skydive/skydive. You can use it to run the client"
 }
 
 do_down() {
