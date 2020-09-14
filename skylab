@@ -5,7 +5,7 @@ set -e
 SCRIPT=`realpath -s $0`
 SCRIPTPATH=`dirname $SCRIPT`
 WORKDIR="$PWD/fdp-skydive"
-K8S_VERSION=v1.14.10
+#K8S_VERSION=v1.14.10
 
 usage(){
     echo "Usage: $0 [options] command [command options]"
@@ -33,6 +33,7 @@ info() {
 }
 
 do_clean() {
+    do_down
     info "Cleaning working directory"
     rm -rf $WORKDIR
     docker rmi ovn-kube-f
