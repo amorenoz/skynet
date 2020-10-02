@@ -31,8 +31,8 @@ Note it will ask you for your sudo password for some operations (opening a port 
 
 ### Access the Skydive UI
 
-    skylab forward &
-    skydive kibana
+    skylab forward
+    skylab kibana
 
 Now you can access Skydive UI at localhost:8082 and Kibana dashboard at localhost:5601
 If you're running skylab in a remote VM, you might need to forward those ports to your local host with a comand such as
