@@ -61,6 +61,10 @@ data:
   SKYDIVE_ANALYZER_TOPOLOGY_PROBES: k8s ovn
   SKYDIVE_OVS_OFLOW_ENABLE: "true"
   SKYDIVE_ANALYZER_TOPOLOGY_OVN_ADDRESS: "tcp:ovnkube-db.ovn-kubernetes.svc.cluster.local:6641"
+<<<<<<< HEAD
+=======
+  SKYDIVE_LOGGING_LEVEL: "DEBUG"
+>>>>>>> d6d36b1... Build custom skydive image for development
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -73,6 +77,8 @@ data:
   SKYDIVE_AGENT_TOPOLOGY_PROBES: runc ovsdb socketinfo netlink docker
   SKYDIVE_AGENT_LISTEN: 127.0.0.1:8081
   SKYDIVE_OVS_OFLOW_ENABLE: "true"
+  SKYDIVE_OVS_OFLOW_NATIVE: "true"
+  SKYDIVE_LOGGING_LEVEL: "DEBUG"
 ---
 apiVersion: apps/v1
 kind: Deployment
