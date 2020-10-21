@@ -1,0 +1,21 @@
+agent:
+  topology:
+    probes:
+      - ovsdb
+      - socketinfo
+      - docker
+      - netlink
+      - runc
+
+  runc:
+    run_path:
+    - /var/run/runc
+    - /var/run/runc-ctrs
+
+analyzer:
+  topology:
+    proges:
+      - ovn
+      - k8s
+
+  listen: 0.0.0.0:8082

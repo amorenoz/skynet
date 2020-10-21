@@ -5,6 +5,10 @@ set -e
 SCRIPT=`realpath -s $0`
 SCRIPTPATH=`dirname $SCRIPT`
 WORKDIR="$PWD/fdp-skydive"
+BUILD_SKYDIVE=1
+SKYDIVE_REV="${SKYDIVE_REV:-master}"
+SKYDIVE_REPO="${SKYDIVE_REPO:-default}"
+SKYDIVE_DOCKER_IMG=skydive:devel
 #K8S_VERSION=v1.14.10
 
 usage(){
@@ -12,6 +16,7 @@ usage(){
     echo ""
     echo "commands:"
     echo "  create:         Create a Lab instance with KIND + OVS + SKYDIVE"
+    echo "      -n          Do not build skydive. Use latest uptream image (much faster)"
     echo "  clean:          Clean up the lab"
     echo "  up:             Start the lab"
     echo "  down:           Stop the lab"
@@ -19,9 +24,12 @@ usage(){
     echo "  kibana:         Start a Kibana container to inspect the ElasticSearch database directly"
     echo ""
     echo "general options:"
-    echo "  -h:             Display this help message"
-    echo "  -v:             Be verbose"
-    echo "  -w WORKDIR:     Use the specified path as working directory. Default \$PWD/fdp-skydive/"
+    echo "  -h:              Display this help message"
+    echo "  -v:              Be verbose"
+    echo "  -w WORKDIR:      Use the specified path as working directory. Default \$PWD/fdp-skydive/"
+    echo "Env vars:"
+    echo "  SKYDIVE_REPO:       if set, checkout SKYDIVE_REF reference from this repo before building skydive"
+    echo "  SKYDIVE_REF:        reference within SKYDIVE_REPO to build"
 }
 
 error() {
@@ -35,13 +43,26 @@ info() {
 do_clean() {
     do_down
     info "Cleaning working directory"
+    go clean --modcache
     rm -rf $WORKDIR
     docker rmi ovn-kube-f
+    docker rmi ${SKYDIVE_DOCKER_IMG}
     info "Removing kubeconfig"
     rm -f $HOME/admin.conf
 }
 
 do_create () {
+    while getopts "hn" opt; do
+        case ${opt} in
+            h )
+                usage 
+                exit 0
+                ;;
+            n ) 
+                BUILD_SKYDIVE=0
+                ;;
+        esac
+    done
     # Check docker is installed and running
     docker version > /dev/null || (error "Docker not installed"; exit 1)
     # Check go is installed
@@ -87,14 +108,35 @@ EOF
     popd # ovn-kubernetes
 
     info "Getting Skydive"
-    pushd $WORKDIR
-      git clone https://github.com/amorenoz/skydive.git
-      pushd skydive
-        git checkout poc-ovn
-        info "Building skydive from source takes too long. Downloading the binary to use it as client"
-        curl -Lo - https://github.com/skydive-project/skydive-binaries/raw/jenkins-builds/skydive-latest.gz | gzip -d > skydive && chmod +x skydive
-      popd
-    popd 
+    if [ $BUILD_SKYDIVE == 1 ]; then 
+        mkdir -p $GOPATH/src/github.com/skydive-project
+        git clone https://github.com/skydive-project/skydive.git \
+              $GOPATH/src/github.com/skydive-project/skydive
+
+        pushd $GOPATH/src/github.com/skydive-project/skydive
+            if [[ $SKYDIVE_REPO != "default" ]]; then
+                git remote add alt $SKYDIVE_REPO
+                git fetch alt
+                git checkout alt/$SKYDIVE_REF
+            fi
+            info "Building Skydive. This may take some time..."
+            make build
+            make install
+        popd
+        # Install in WORKDIR for convenience
+        cp $GOPATH/src/github.com/skydive-project/skydive/skydive $WORKDIR
+    else
+        info "Downloading the skydive binary"
+        pushd $WORKDIR
+            curl -Lo - https://github.com/skydive-project/skydive-binaries/raw/jenkins-builds/skydive-latest.gz | gzip -d > skydive && chmod +x skydive
+        popd 
+    fi
+    pushd images/skydive
+        info "Building skydive image"
+        cp $WORKDIR/skydive .
+        docker build -t ${SKYDIVE_DOCKER_IMG} . 
+        rm skydive
+    popd
     
 }
 
@@ -105,9 +147,13 @@ do_up() {
         K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh
     )
     popd
+
+    info "Loading locally built image $SKYDIVE_DOCKER_IMG"
+    kind load docker-image ${SKYDIVE_DOCKER_IMG} --name ovn
+
     info "Deploying skydive"
     export KUBECONFIG=$HOME/admin.conf
-    kubectl apply -f $WORKDIR/skydive/contrib/kubernetes/skydive.yaml
+    kubectl apply -f deployments/skydive.yaml
     info "Waiting 10s until skydive gets deployed"
     sleep 10
     info "Skydive should be ready"
@@ -115,14 +161,14 @@ do_up() {
     info "Access your cluster by adding the following variable to your env:"
     info "export KUBECONFIG=$HOME/admin.conf"
     echo ""
-    info "The skydive binary is in $WORKDIR/skydive/skydive. You can use it to run the client"
+    info "The skydive binary is in $WORKDIR/skydive. You can use it to run the client"
 }
 
 do_down() {
     echo "Stopping the lab"
     pushd "$GOPATH/src/github.com/ovn-org/ovn-kubernetes/contrib"
     (
-        K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh --delete
+        K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh --delete 
     )
     popd
     docker stop skydive-kibana > /dev/null || true
@@ -133,7 +179,7 @@ do_forward() {
     export KUBECONFIG=$HOME/admin.conf
     info "Forwaring UI ports. You can access the UI on localhost:8082"
     info "Feel free to move this process to the background..."
-    kubectl port-forward --namespace ovn-kubernetes service/skydive-analyzer 8082 9200
+    kubectl port-forward --namespace skydive service/skydive-analyzer 8082 9200
 }
 
 do_kibana() {
