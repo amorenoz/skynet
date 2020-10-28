@@ -20,19 +20,19 @@ Testing Fast DataPath visualization in Skydive
 
 ### Create the lab
 
-    skylab create
+    ./scripts/skylab create
 
 Note it will ask you for your sudo password for some operations (opening a port in firewalld)
 
 ### Start the lab
 
-    skylab up
+    ./scripts/skylab up
 
 
 ### Access the Skydive UI
 
-    skylab forward
-    skylab kibana
+    ./scripts/skylab forward
+    ./scripts/skylab kibana
 
 Now you can access Skydive UI at localhost:8082 and Kibana dashboard at localhost:5601
 If you're running skylab in a remote VM, you might need to forward those ports to your local host with a comand such as
@@ -42,9 +42,9 @@ If you're running skylab in a remote VM, you might need to forward those ports t
 
 ### Stop the lab
 
-    skylab down
+    ./scripts/skylab down
 
 ### Clean the lab
 
-    skylab up
+    ./scripts/skylab up
 
