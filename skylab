@@ -20,6 +20,7 @@ usage(){
     echo "  clean:          Clean up the lab"
     echo "  up:             Start the lab"
     echo "  down:           Stop the lab"
+    echo "  apply:          Apply the local changes performed on $WORKDIR/go/src/skydive-project/skydive"
     echo "  forward:        Foward the UI ports (needed for Skydive UI and Kibana dashboard)"
     echo "  kibana:         Start a Kibana container to inspect the ElasticSearch database directly"
     echo ""
@@ -55,10 +56,10 @@ do_create () {
     while getopts "hn" opt; do
         case ${opt} in
             h )
-                usage 
+                usage
                 exit 0
                 ;;
-            n ) 
+            n )
                 BUILD_SKYDIVE=0
                 ;;
         esac
@@ -76,7 +77,7 @@ do_create () {
 
     info "Installing kubectl"
     which kubectl >/dev/null || (
-    cat > /etc/yum.repos.d/kubernetes.repo <<EOF 
+    cat > /etc/yum.repos.d/kubernetes.repo <<EOF
 [kubernetes]
 name=Kubernetes
 baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
@@ -85,13 +86,13 @@ gpgcheck=1
 repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
-    sudo dnf install -y kubectl 
+    sudo dnf install -y kubectl
     )
 
     info "Opening port 11337 in the firewall"
     sudo firewall-cmd --add-port=11337/tcp
     sudo firewall-cmd --reload
-    
+
     info "Building ovn-k8s"
     go get github.com/ovn-org/ovn-kubernetes | true
     pushd $GOPATH/src/github.com/ovn-org/ovn-kubernetes
@@ -108,7 +109,7 @@ EOF
     popd # ovn-kubernetes
 
     info "Getting Skydive"
-    if [ $BUILD_SKYDIVE == 1 ]; then 
+    if [ $BUILD_SKYDIVE == 1 ]; then
         mkdir -p $GOPATH/src/github.com/skydive-project
         git clone https://github.com/skydive-project/skydive.git \
               $GOPATH/src/github.com/skydive-project/skydive
@@ -119,25 +120,46 @@ EOF
                 git fetch alt
                 git checkout alt/$SKYDIVE_REF
             fi
-            info "Building Skydive. This may take some time..."
-            make build
-            make install
         popd
-        # Install in WORKDIR for convenience
-        cp $GOPATH/src/github.com/skydive-project/skydive/skydive $WORKDIR
+        info "Building Skydive. This may take some time..."
+        build_skydive
     else
         info "Downloading the skydive binary"
         pushd $WORKDIR
             curl -Lo - https://github.com/skydive-project/skydive-binaries/raw/jenkins-builds/skydive-latest.gz | gzip -d > skydive && chmod +x skydive
-        popd 
+        popd
     fi
+    build_image
+}
+
+build_skydive() {
+    pushd $GOPATH/src/github.com/skydive-project/skydive
+        make build
+        make install
+    popd
+    # Install in WORKDIR for convenience
+    cp $GOPATH/src/github.com/skydive-project/skydive/skydive $WORKDIR
+}
+
+build_image() {
     pushd images/skydive
-        info "Building skydive image"
         cp $WORKDIR/skydive .
-        docker build -t ${SKYDIVE_DOCKER_IMG} . 
+        docker build -t ${SKYDIVE_DOCKER_IMG} .
         rm skydive
     popd
-    
+}
+
+do_apply() {
+    export KUBECONFIG=$HOME/admin.conf
+    kubectl delete -f deployments/skydive.yaml || true
+    info "Re-building skydive"
+    build_skydive
+    info "Re-building skydive"
+    build_image
+    info "Loading new image $SKYDIVE_DOCKER_IMG"
+    kind load docker-image ${SKYDIVE_DOCKER_IMG} --name ovn
+    info "Deploying skydive"
+    kubectl apply -f deployments/skydive.yaml
 }
 
 do_up() {
@@ -168,7 +190,7 @@ do_down() {
     echo "Stopping the lab"
     pushd "$GOPATH/src/github.com/ovn-org/ovn-kubernetes/contrib"
     (
-        K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh --delete 
+        K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh --delete
     )
     popd
     docker stop skydive-kibana > /dev/null || true
@@ -236,6 +258,9 @@ case $CMD in
         ;;
     forward)
         do_forward $@
+        ;;
+    apply)
+        do_apply $@
         ;;
     kibana)
         do_kibana $@
