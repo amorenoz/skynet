@@ -1,10 +1,16 @@
 import click
 from graphviz import Digraph
+from typing import Dict, List, Any
+
+from skynet.context import SkyNetCtxt
 
 
 @click.group(name='ovn')
 @click.pass_obj
-def ovncli(obj):
+def ovncli(obj) -> None:
+    """
+    OVN command
+    """
     pass
 
 
@@ -16,18 +22,18 @@ def ovncli(obj):
               type=str,
               help='Kubernetes namespace to plot')
 @click.pass_obj
-def topology(obj, namespace):
+def topology(obj: SkyNetCtxt, namespace: str) -> None:
     """
     Show the OVN logical topology
     """
-    graph = obj.lookup(
+    graph = obj.rest_cli().lookup(
         "g.V().Has('Manager', 'ovn').As('ovn').g.V().Has('Type', Within('pod')).Has('K8s.Namespace', '{name}').As('k8s').Select('ovn','k8s').Subgraph()"
         .format(name=namespace))
     dot = topo2dot('OVN Topology', graph[0])
     dot.view()
 
 
-def topo2dot(name, graph):
+def topo2dot(name: str, graph: Dict[str, List[Any]]) -> Digraph:
     """
     Transform a topology graph into a Digraph object
     """

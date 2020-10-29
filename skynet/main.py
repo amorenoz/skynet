@@ -1,17 +1,23 @@
 import click
-from skydive.rest.client import RESTClient
 
-import skynet.ovn.cli
+from skynet.context import SkyNetCtxt
+from skynet.ovn.cli import ovncli
 
 
 @click.group()
 @click.pass_context
 def maincli(ctx):
-    ctx.obj = RESTClient("localhost:8082")
+    """
+    Sky Net Utility
+    """
+    ctx.obj = SkyNetCtxt()
 
 
 def main():
+    """
+    Main Function
+    """
     maincli()
 
 
-maincli.add_command(skynet.ovn.cli.ovncli)
+maincli.add_command(ovncli)
