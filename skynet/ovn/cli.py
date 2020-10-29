@@ -3,11 +3,12 @@ from graphviz import Digraph
 from typing import Dict, List, Any
 
 from skynet.context import SkyNetCtxt
+from skynet.ovn.lr.cli import lrcli
 
 
 @click.group(name='ovn')
 @click.pass_obj
-def ovncli(obj) -> None:
+def ovncli(obj: SkyNetCtxt) -> None:
     """
     OVN command
     """
@@ -61,3 +62,5 @@ def topo2dot(name: str, graph: Dict[str, List[Any]]) -> Digraph:
         dot.edge(edge['Parent'], edge['Child'])
 
     return dot
+
+ovncli.add_command(lrcli)
