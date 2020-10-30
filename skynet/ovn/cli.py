@@ -6,6 +6,8 @@ from skynet.context import SkyNetCtxt
 from skynet.ovn.lr.cli import lrcli
 from skynet.ovn.ls.cli import lscli
 from skynet.ovn.acl.cli import aclcli
+from skynet.ovn.lrp.cli import lrpcli
+from skynet.ovn.lsp.cli import lspcli
 
 
 @click.group(name='ovn')
@@ -68,3 +70,5 @@ def topo2dot(name: str, graph: Dict[str, List[Any]]) -> Digraph:
 ovncli.add_command(lrcli)
 ovncli.add_command(lscli)
 ovncli.add_command(aclcli)
+ovncli.add_command(lrpcli)
+ovncli.add_command(lspcli)
