@@ -26,6 +26,9 @@ class LRData(SkyDiveData):
 
 
 class LRProvider():
+    """
+    LRProvider is a provider for Logical Routers
+    """
     def __init__(self, ctxt: SkyNetCtxt):
         """
         LRProvider constructor
