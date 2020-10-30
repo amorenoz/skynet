@@ -36,5 +36,8 @@ class ACLProvider():
         self._ctxt = ctxt
 
     def get(self) -> ACLData:
-        data = self._ctxt.rest_cli().lookup("g.V().Has('Type', 'acl')")
+        at = "At('%s')." % self._ctxt.options().get(
+            'at') if self._ctxt.options().get('at') else ''
+        data = self._ctxt.rest_cli().lookup(
+            "g.{at}V().Has('Type', 'acl')".format(at=at))
         return ACLData(data)

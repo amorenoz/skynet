@@ -31,9 +31,11 @@ def topology(obj: SkyNetCtxt, namespace: str) -> None:
     """
     Show the OVN logical topology
     """
+    at = "At('%s')." % obj.options().get('at') if obj.options(
+    ).get('at') else ''
     graph = obj.rest_cli().lookup(
-        "g.V().Has('Manager', 'ovn').As('ovn').g.V().Has('Type', Within('pod')).Has('K8s.Namespace', '{name}').As('k8s').Select('ovn','k8s').Subgraph()"
-        .format(name=namespace))
+        "g.{at}V().Has('Manager', 'ovn').As('ovn').g.V().Has('Type', Within('pod')).Has('K8s.Namespace', '{name}').As('k8s').Select('ovn','k8s').Subgraph()"
+        .format(at=at, name=namespace))
     dot = topo2dot('OVN Topology', graph[0])
     dot.view()
 
@@ -66,6 +68,7 @@ def topo2dot(name: str, graph: Dict[str, List[Any]]) -> Digraph:
         dot.edge(edge['Parent'], edge['Child'])
 
     return dot
+
 
 ovncli.add_command(lrcli)
 ovncli.add_command(lscli)

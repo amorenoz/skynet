@@ -34,6 +34,8 @@ class LSProvider():
         self._ctxt = ctxt
 
     def get(self) -> LSData:
+        at = "At('%s')." % self._ctxt.options().get(
+            'at') if self._ctxt.options().get('at') else ''
         data = self._ctxt.rest_cli().lookup(
-            "g.V().Has('Type', 'logical_switch')")
+            "g.{at}V().Has('Type', 'logical_switch')".format(at=at))
         return LSData(data)

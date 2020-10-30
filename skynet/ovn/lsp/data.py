@@ -38,6 +38,9 @@ class LSPProvider():
         self._ctxt = ctxt
 
     def get(self) -> LSPData:
+        at = "At('%s')." % self._ctxt.options().get(
+            'at') if self._ctxt.options().get('at') else ''
         data = self._ctxt.rest_cli().lookup(
-            "g.V().Has('Type', 'logical_switch_port')")
+            "g.{at}V().Has('Type', 'logical_switch_port')".format(at=at))
+
         return LSPData(data)

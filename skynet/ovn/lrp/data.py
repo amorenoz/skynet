@@ -37,6 +37,8 @@ class LRPProvider():
         self._ctxt = ctxt
 
     def get(self) -> LRPData:
+        at = "At('%s')." % self._ctxt.options().get(
+            'at') if self._ctxt.options().get('at') else ''
         data = self._ctxt.rest_cli().lookup(
-            "g.V().Has('Type', 'logical_router_port')")
+            "g.{at}V().Has('Type', 'logical_router_port')".format(at=at))
         return LRPData(data)
