@@ -67,11 +67,13 @@ class SkyDiveData:
         self._meta = meta
         self._data = self._to_dataframe()
 
-    def to_string(self, columns: List[str] = None) -> str:
+    def to_string(self,
+                  columns: List[str] = None,
+                  justify: str = "center") -> str:
         """
         Print the data into a string
         """
-        return self._data.to_string(columns=columns)
+        return self._data.to_string(columns=columns, justify=justify)
 
     def data(self) -> DataFrame:
         """
