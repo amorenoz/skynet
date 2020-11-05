@@ -53,7 +53,7 @@ class SkyDiveData:
 
     def __init__(self,
                  data: RawData,
-                 meta: Metadata,
+                 meta: List[Metadata],
                  index: str = None) -> None:
         """
         SkyDiveData Constructor
@@ -74,6 +74,20 @@ class SkyDiveData:
         Print the data into a string
         """
         return self._data.to_string(columns=columns, justify=justify)
+
+    def to_json(self, *args, **kwargs):
+        """
+        Print to json. Based on Dataframe.to_json. See:
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_json.html
+        """
+        return self._data.to_json(*args, **kwargs)
+
+    def to_html(self, *args, **kwargs):
+        """
+        Print to html. Based on Dataframe.to_html. See:
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_html.html
+        """
+        return self._data.to_html(*args, **kwargs)
 
     def data(self) -> DataFrame:
         """
