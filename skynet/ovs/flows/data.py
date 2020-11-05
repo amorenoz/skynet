@@ -46,11 +46,9 @@ class OFFlowProvider:
         self._ctxt = ctxt
 
     def get(self) -> OFFLowData:
-        print('Sending query')
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
         data = self._ctxt.rest_cli().lookup(
             "g.{at}V().Has('Type', 'ofrule')".format(at=at))
 
-        print('Query ended')
         return OFFLowData(data)
