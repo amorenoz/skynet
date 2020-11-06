@@ -27,7 +27,7 @@ class OFFLowData(SkyDiveData):
         """
         Pretty print each flow
         """
-        if not self._data:
+        if self.is_empty():
             return "No data"
 
         pp = pprint.PrettyPrinter(compact=False, width=200, sort_dicts=False)
@@ -39,8 +39,8 @@ class OFFLowData(SkyDiveData):
         """ Experimental (not fully implemented) ovs flow format. It tires to mimic the output of
         ovs-ofproto dump-flows
         """
-        if not self._data:
-            return ""
+        if self.is_empty():
+            return "No data"
 
         fp = OVSFlowPrinter()
         for uid, flow in self._data.iterrows():
@@ -63,7 +63,8 @@ class OFFlowProvider(SkyDiveDataProvider):
             'at') if self._ctxt.options().get('at') else ''
 
         query = "g.{at}V().{filt}".format(at=at, filt=gremlin_filter)
-        data = self._run_query(query)
+        data = self._ctxt.rest_cli().lookup(query)
+
         return OFFLowData(data)
 
     def _gen_gremlin_filter(self, filter_dict: Dict[str, Any]) -> str:

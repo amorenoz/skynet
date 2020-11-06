@@ -70,13 +70,19 @@ class SkyDiveData:
         self._meta = meta
         self._data = self._to_dataframe()
 
+    def is_empty(self):
+        """
+        Returns whether the data is empty
+        """
+        return len(self._raw) == 0
+
     def to_string(self,
                   columns: List[str] = None,
                   justify: str = "center") -> str:
         """
         Print the data into a string
         """
-        if not self._data:
+        if self.is_empty():
             return "No data"
 
         return self._data.to_string(columns=columns, justify=justify)
@@ -86,7 +92,7 @@ class SkyDiveData:
         Print to json. Based on Dataframe.to_json. See:
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_json.html
         """
-        if not self._data:
+        if self.is_empty():
             return "{}"
         return self._data.to_json(*args, **kwargs)
 
@@ -95,7 +101,7 @@ class SkyDiveData:
         Print to html. Based on Dataframe.to_html. See:
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_html.html
         """
-        if not self._data:
+        if self.is_empty():
             return "No data"
 
         return self._data.to_html(*args, **kwargs)
@@ -153,3 +159,4 @@ class SkyDiveDataProvider:
         log.debug('Result len: %i' % len(data))
 
         return data
+
