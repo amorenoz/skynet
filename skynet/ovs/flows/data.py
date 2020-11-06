@@ -45,10 +45,27 @@ class OFFlowProvider:
     def __init__(self, ctxt: SkyNetCtxt):
         self._ctxt = ctxt
 
-    def get(self) -> OFFLowData:
+    def get(self, filter_dict: Dict[str, Any] = {}) -> OFFLowData:
+        gremlin_filter = self._gen_gremlin_filter(filter_dict)
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
-        data = self._ctxt.rest_cli().lookup(
-            "g.{at}V().Has('Type', 'ofrule')".format(at=at))
+
+        query = "g.{at}V().{filt}".format(at=at, filt=gremlin_filter)
+        print('Query = %s' % query)
+        data = self._ctxt.rest_cli().lookup(query)
 
         return OFFLowData(data)
+
+    def _gen_gremlin_filter(self, filter_dict: Dict[str, Any]) -> str:
+        gremlin_str = "Has('Type', 'ofrule'"
+        gremlin_filter = ""
+        for filter_key, filter_val in filter_dict.items():
+            if isinstance(filter_val, str):
+                filter_val_str = "'{}'".format(filter_val)
+            elif isinstance(filter_val, int):
+                filter_val_str = "{}".format(filter_val)
+
+            gremlin_filter += ",'{}',{}".format(filter_key, filter_val_str)
+
+        return "Has('Type', 'ofrule'{})".format(gremlin_filter)
+

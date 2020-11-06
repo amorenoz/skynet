@@ -16,24 +16,37 @@ def ovscli(obj: SkyNetCtxt) -> None:
 
 
 
-def trim(data):
-    if len(str(data)) < 50:
-        return data
+@click.group(name='flows')
+@click.pass_obj
+def flowscli(obj: SkyNetCtxt) -> None:
+    """
+    OVS flows commands
+    """
+    pass
 
-    return "{}...".format(str(data)[0:50])
-
-
-@ovscli.command()
+@flowscli.command()
 @click.pass_obj
 @click.option('--format',
               '-f',
               default="text",
               help='Specify an alternative output format: [json, html]')
-def flows(obj: SkyNetCtxt, format) -> None:
+@click.argument('filter', required=False, default="")
+def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
     """
-    Show the OVS flows
+    List the OVS flows
+
+    \b
+    FILTER is a Filter string formatted as "Filter1=Value1,Filter2=Value2,..."
+    Supported Filters:
+        Host        [Hostname]
+        Cookie:     [Cookie]
+        Table:      [Table Num]
+        Priority    [Priority Num]
+    E.g Host=mynode1.cluster,Cookie='0x12334',Table=3
     """
-    flows = OFFlowProvider(obj).get()
+
+    processed_filter = process_flow_filter(filter) if filter else {}
+    flows = OFFlowProvider(obj).get(processed_filter)
     print(format)
     if format == "text":
         print(flows.to_text())
@@ -43,3 +56,36 @@ def flows(obj: SkyNetCtxt, format) -> None:
         print(flows.to_html())
     elif format == "ovs":
         print(flows.to_ovs())
+
+def process_flow_filter(filter_str: str) -> Dict[str, Any]:
+    """
+    Process incoming filter strings and return a valid filter dictionary
+    """
+    filters = {
+        "Table": int,
+        "Cookie": str,
+        "Priority": int,
+        "Host": str
+    }
+
+    filter_dict = {}
+    for filter_elem in filter_str.split(','):
+        filter_parts = filter_elem.split('=')
+        if len(filter_parts) != 2:
+            raise click.ClickException('Wrong filter format')
+        key = filter_parts[0]
+        val = filter_parts[1]
+        if not key or not val:
+            raise click.ClickException('Wrong filter format')
+        if key not in filters.keys():
+            raise click.ClickException('Unsupported filter %s' % key)
+
+        filter_dict[key] = filters[key](val)
+        print(filter_dict)
+    return filter_dict
+
+
+
+
+ovscli.add_command(flowscli)
+
