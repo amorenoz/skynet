@@ -147,7 +147,7 @@ class SkyDiveDataProvider:
         """
         Run a Skydive Query
         """
-        log = logging.getLogger()
+        log = logging.getLogger("Data")
         log.debug('Query: %s' % query)
         data = self._ctxt.rest_cli().lookup(query)
         log.debug('Result len: %i' % len(data))
