@@ -160,3 +160,20 @@ class SkyDiveDataProvider:
 
         return data
 
+    @classmethod
+    def _gen_gremlin_filter(cls, filter_dict: Dict[str, Any]) -> str:
+        """
+        Generate a gremlin query string based on a dictionary of filters
+        """
+        gremlin_filter = ""
+        for filter_key, filter_val in filter_dict.items():
+            if isinstance(filter_val, str):
+                filter_val_str = "'{}'".format(filter_val)
+            elif isinstance(filter_val, int):
+                filter_val_str = "{}".format(filter_val)
+
+            gremlin_filter += "'{}',{}".format(filter_key, filter_val_str)
+
+        return '.Has({})'.format(
+            gremlin_filter) if len(gremlin_filter) > 0 else ""
+

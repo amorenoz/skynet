@@ -62,20 +62,9 @@ class OFFlowProvider(SkyDiveDataProvider):
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
 
-        query = "g.{at}V().{filt}".format(at=at, filt=gremlin_filter)
-        data = self._ctxt.rest_cli().lookup(query)
+        query = "g.{at}V().Has('Type', 'ofrule'){filt}".format(at=at, filt=self._gen_gremlin_filter(filter_dict))
+
+        data = self._run_query(query)
 
         return OFFLowData(data)
 
-    def _gen_gremlin_filter(self, filter_dict: Dict[str, Any]) -> str:
-        gremlin_str = "Has('Type', 'ofrule'"
-        gremlin_filter = ""
-        for filter_key, filter_val in filter_dict.items():
-            if isinstance(filter_val, str):
-                filter_val_str = "'{}'".format(filter_val)
-            elif isinstance(filter_val, int):
-                filter_val_str = "{}".format(filter_val)
-
-            gremlin_filter += ",'{}',{}".format(filter_key, filter_val_str)
-
-        return "Has('Type', 'ofrule'{})".format(gremlin_filter)
