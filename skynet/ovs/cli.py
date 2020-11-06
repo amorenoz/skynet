@@ -15,7 +15,6 @@ def ovscli(obj: SkyNetCtxt) -> None:
     pass
 
 
-
 @click.group(name='flows')
 @click.pass_obj
 def flowscli(obj: SkyNetCtxt) -> None:
@@ -23,6 +22,7 @@ def flowscli(obj: SkyNetCtxt) -> None:
     OVS flows commands
     """
     pass
+
 
 @flowscli.command()
 @click.pass_obj
@@ -47,7 +47,6 @@ def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
 
     processed_filter = process_flow_filter(filter) if filter else {}
     flows = OFFlowProvider(obj).get(processed_filter)
-    print(format)
     if format == "text":
         print(flows.to_text())
     elif format == "json":
@@ -57,16 +56,12 @@ def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
     elif format == "ovs":
         print(flows.to_ovs())
 
+
 def process_flow_filter(filter_str: str) -> Dict[str, Any]:
     """
     Process incoming filter strings and return a valid filter dictionary
     """
-    filters = {
-        "Table": int,
-        "Cookie": str,
-        "Priority": int,
-        "Host": str
-    }
+    filters = {"Table": int, "Cookie": str, "Priority": int, "Host": str}
 
     filter_dict = {}
     for filter_elem in filter_str.split(','):
@@ -81,11 +76,7 @@ def process_flow_filter(filter_str: str) -> Dict[str, Any]:
             raise click.ClickException('Unsupported filter %s' % key)
 
         filter_dict[key] = filters[key](val)
-        print(filter_dict)
     return filter_dict
 
 
-
-
 ovscli.add_command(flowscli)
-

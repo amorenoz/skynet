@@ -2,7 +2,7 @@ from typing import Dict, List, Any
 from pandas import DataFrame
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveData, Metadata
+from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
 
 
 class LSPData(SkyDiveData):
@@ -27,7 +27,7 @@ class LSPData(SkyDiveData):
                                       index="UUID")
 
 
-class LSPProvider():
+class LSPProvider(SkyDiveDataProvider):
     """
     LSPProvider is a provider for Logical Switches
     """
@@ -35,12 +35,12 @@ class LSPProvider():
         """
         LSProvider constructor
         """
-        self._ctxt = ctxt
+        super(LSPProvider, self).__init__(ctxt=ctxt)
 
     def get(self) -> LSPData:
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
-        data = self._ctxt.rest_cli().lookup(
-            "g.{at}V().Has('Type', 'logical_switch_port')".format(at=at))
 
+        query = "g.{at}V().Has('Type', 'logical_switch_port')".format(at=at)
+        data = self._run_query(query)
         return LSPData(data)

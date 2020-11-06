@@ -1,7 +1,7 @@
 from typing import Dict, List, Any
 import pprint
 
-from skynet.common.data import SkyDiveData, Metadata
+from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
 from skynet.context import SkyNetCtxt
 from skynet.ovs.flows.ovs_printer import OVSFlowPrinter
 
@@ -27,6 +27,9 @@ class OFFLowData(SkyDiveData):
         """
         Pretty print each flow
         """
+        if not self._data:
+            return "No data"
+
         pp = pprint.PrettyPrinter(compact=False, width=200, sort_dicts=False)
         for uid, flow in self._data.iterrows():
             pp.pprint(flow.to_dict())
@@ -36,14 +39,23 @@ class OFFLowData(SkyDiveData):
         """ Experimental (not fully implemented) ovs flow format. It tires to mimic the output of
         ovs-ofproto dump-flows
         """
+        if not self._data:
+            return ""
+
         fp = OVSFlowPrinter()
         for uid, flow in self._data.iterrows():
             fp.fprint(flow)
 
 
-class OFFlowProvider:
+class OFFlowProvider(SkyDiveDataProvider):
+    """
+    OFFlowProvider is a provider for OpenFlowFlows
+    """
     def __init__(self, ctxt: SkyNetCtxt):
-        self._ctxt = ctxt
+        """
+        LSProvider constructor
+        """
+        super(OFFlowProvider, self).__init__(ctxt=ctxt)
 
     def get(self, filter_dict: Dict[str, Any] = {}) -> OFFLowData:
         gremlin_filter = self._gen_gremlin_filter(filter_dict)
@@ -51,9 +63,7 @@ class OFFlowProvider:
             'at') if self._ctxt.options().get('at') else ''
 
         query = "g.{at}V().{filt}".format(at=at, filt=gremlin_filter)
-        print('Query = %s' % query)
-        data = self._ctxt.rest_cli().lookup(query)
-
+        data = self._run_query(query)
         return OFFLowData(data)
 
     def _gen_gremlin_filter(self, filter_dict: Dict[str, Any]) -> str:
@@ -68,4 +78,3 @@ class OFFlowProvider:
             gremlin_filter += ",'{}',{}".format(filter_key, filter_val_str)
 
         return "Has('Type', 'ofrule'{})".format(gremlin_filter)
-

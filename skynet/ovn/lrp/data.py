@@ -2,7 +2,7 @@ from typing import Dict, List, Any
 from pandas import DataFrame
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveData, Metadata
+from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
 
 
 class LRPData(SkyDiveData):
@@ -26,7 +26,7 @@ class LRPData(SkyDiveData):
                                       index="UUID")
 
 
-class LRPProvider():
+class LRPProvider(SkyDiveDataProvider):
     """
     LRPProvider is a provider for Logical Router Ports
     """
@@ -34,11 +34,12 @@ class LRPProvider():
         """
         LRPProvider constructor
         """
-        self._ctxt = ctxt
+        super(LRPProvider, self).__init__(ctxt=ctxt)
 
     def get(self) -> LRPData:
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
-        data = self._ctxt.rest_cli().lookup(
-            "g.{at}V().Has('Type', 'logical_router_port')".format(at=at))
+
+        query = "g.{at}V().Has('Type', 'logical_router_port')".format(at=at)
+        data = self._run_query(query)
         return LRPData(data)

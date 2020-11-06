@@ -2,7 +2,7 @@ from typing import Dict, List, Any
 from pandas import DataFrame
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveData, Metadata
+from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
 
 
 class NodeData(SkyDiveData):
@@ -28,19 +28,21 @@ class NodeData(SkyDiveData):
                                        index="ID")
 
 
-class NodeProvider():
+class NodeProvider(SkyDiveDataProvider):
     """
     NodeProvider is a provider for K8s Nodes
     """
     def __init__(self, ctxt: SkyNetCtxt):
         """
-        LSProvider constructor
+        NodeProvider constructor
         """
-        self._ctxt = ctxt
+        super(NodeProvider, self).__init__(ctxt=ctxt)
 
     def get(self) -> NodeData:
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
-        data = self._ctxt.rest_cli().lookup(
-            "g.{at}V().Has('Type', 'node')".format(at=at))
+
+        query = "g.{at}V().Has('Type', 'node')".format(at=at)
+
+        data = self._run_query(query)
         return NodeData(data)

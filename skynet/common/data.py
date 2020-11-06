@@ -1,5 +1,8 @@
+import logging
 from typing import Dict, List, Callable, Any
 from pandas import DataFrame, Timestamp
+
+from skynet.context import SkyNetCtxt
 
 MetadataList = List[Dict[str, Callable]]
 RawData = List[Dict[str, Any]]
@@ -73,6 +76,9 @@ class SkyDiveData:
         """
         Print the data into a string
         """
+        if not self._data:
+            return "No data"
+
         return self._data.to_string(columns=columns, justify=justify)
 
     def to_json(self, *args, **kwargs):
@@ -80,6 +86,8 @@ class SkyDiveData:
         Print to json. Based on Dataframe.to_json. See:
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_json.html
         """
+        if not self._data:
+            return "{}"
         return self._data.to_json(*args, **kwargs)
 
     def to_html(self, *args, **kwargs):
@@ -87,6 +95,9 @@ class SkyDiveData:
         Print to html. Based on Dataframe.to_html. See:
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_html.html
         """
+        if not self._data:
+            return "No data"
+
         return self._data.to_html(*args, **kwargs)
 
     def data(self) -> DataFrame:
@@ -99,6 +110,9 @@ class SkyDiveData:
         """
         Process the raw data into a DataFrame
         """
+        if len(self._raw) == 0:
+            return None
+
         dataframe = DataFrame.from_records(data=self._extract(),
                                            index=self._index)
         return dataframe
@@ -116,3 +130,26 @@ class SkyDiveData:
                for meta in self._meta}
         } for el in self._raw]
         return extracted
+
+
+class SkyDiveDataProvider:
+    """
+    SkyDiveDataProvider serves as base class for other providers
+    giving some basic common functionality
+    """
+    def __init__(self, ctxt: SkyNetCtxt) -> None:
+        """
+        Constructor
+        """
+        self._ctxt = ctxt
+
+    def _run_query(self, query: str) -> List[Dict[str, Any]]:
+        """
+        Run a Skydive Query
+        """
+        log = logging.getLogger()
+        log.debug('Query: %s' % query)
+        data = self._ctxt.rest_cli().lookup(query)
+        log.debug('Result len: %i' % len(data))
+
+        return data
