@@ -3,6 +3,7 @@ import click
 from skynet.context import SkyNetCtxt
 from skynet.ovn.cli import ovncli
 from skynet.ovs.cli import ovscli
+from skynet.node.cli import nodecli
 
 
 @click.group()
@@ -31,3 +32,4 @@ def main():
 
 maincli.add_command(ovncli)
 maincli.add_command(ovscli)
+maincli.add_command(nodecli)
