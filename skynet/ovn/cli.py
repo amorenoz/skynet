@@ -8,6 +8,7 @@ from skynet.ovn.ls.cli import lscli
 from skynet.ovn.acl.cli import aclcli
 from skynet.ovn.lrp.cli import lrpcli
 from skynet.ovn.lsp.cli import lspcli
+from skynet.ovn.datapath.cli import datapathcli
 
 
 @click.group(name='ovn')
@@ -76,3 +77,4 @@ ovncli.add_command(lscli)
 ovncli.add_command(aclcli)
 ovncli.add_command(lrpcli)
 ovncli.add_command(lspcli)
+ovncli.add_command(datapathcli)
