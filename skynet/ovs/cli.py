@@ -3,7 +3,7 @@ import sys
 from typing import Dict, List, Any
 
 from skynet.context import SkyNetCtxt
-from skynet.ovs.flows.data import OFFLowData, OFFlowProvider
+from skynet.ovs.flows.data import OFFLowData, OFFlowProvider, OFFlowFilter
 
 
 @click.group(name='ovs')
@@ -44,9 +44,9 @@ def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
         Priority    [Priority Num]
     E.g Host=mynode1.cluster,Cookie='0x12334',Table=3
     """
-
-    processed_filter = process_flow_filter(filter) if filter else {}
-    flows = OFFlowProvider(obj).get(processed_filter)
+    filter_obj = OFFlowFilter()
+    filter_obj.process_string(filter)
+    flows = OFFlowProvider(obj).get(filter_obj)
     if format == "text":
         print(flows.to_text())
     elif format == "json":
@@ -55,28 +55,5 @@ def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
         print(flows.to_html())
     elif format == "ovs":
         print(flows.to_ovs())
-
-
-def process_flow_filter(filter_str: str) -> Dict[str, Any]:
-    """
-    Process incoming filter strings and return a valid filter dictionary
-    """
-    filters = {"Table": int, "Cookie": str, "Priority": int, "Host": str}
-
-    filter_dict = {}
-    for filter_elem in filter_str.split(','):
-        filter_parts = filter_elem.split('=')
-        if len(filter_parts) != 2:
-            raise click.ClickException('Wrong filter format')
-        key = filter_parts[0]
-        val = filter_parts[1]
-        if not key or not val:
-            raise click.ClickException('Wrong filter format')
-        if key not in filters.keys():
-            raise click.ClickException('Unsupported filter %s' % key)
-
-        filter_dict[key] = filters[key](val)
-    return filter_dict
-
 
 ovscli.add_command(flowscli)

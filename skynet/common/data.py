@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Callable, Any
+from typing import Dict, List, Callable, Any, Optional
 from pandas import DataFrame, Timestamp
 
 from skynet.context import SkyNetCtxt
@@ -160,20 +160,103 @@ class SkyDiveDataProvider:
 
         return data
 
-    @classmethod
-    def _gen_gremlin_filter(cls, filter_dict: Dict[str, Any]) -> str:
-        """
-        Generate a gremlin query string based on a dictionary of filters
-        """
-        gremlin_filter = ""
-        for filter_key, filter_val in filter_dict.items():
-            if isinstance(filter_val, str):
-                filter_val_str = "'{}'".format(filter_val)
-            elif isinstance(filter_val, int):
-                filter_val_str = "{}".format(filter_val)
 
-            gremlin_filter += "'{}',{}".format(filter_key, filter_val_str)
+class SkyDiveFilterError(Exception):
+    pass
+
+
+class SkyDiveFilter:
+    """
+    SkyDiveFilter defines one filter information
+    Instances of SkyDiveFilters can be created to define filters. A filter is composed of:
+        - a name which will be used for parsing the filter string
+        - a key_name which is the key that will be used for actual filtering in SkyDive
+        - a transformation function that massages the value of the filter to accomodate it to the SkyDive Filter
+            This class includes some predefined transformation functions
+    """
+    def __init__(self, name: str, trans: Any = None, key_name: str = ""):
+        """
+        SkyDiveFilter contructor
+        Args:
+            name: The name of the filter as specified by the user
+            trans: (optional) The name transformation to apply to the filter data before adding it to the gremlin filter
+            key_name: (optional) The key name to apply the filter to (default: same mas 'name')
+        """
+        self.name = name
+        self.trans = trans if trans else self.noop
+        self.key_name = key_name if key_name != "" else name
+
+    @classmethod
+    def noop(cls, val):
+        """
+        Simplest of transformation functions
+        """
+        return val
+
+    @classmethod
+    def string(cls, val):
+        """
+        Simple tranformation function that just single-quotes the string
+        """
+        return "'{}'".format(val)
+
+
+class SkyDiveDataFilter:
+    """
+    SkyDiveFilter implements filtering on skydive queries
+    """
+    def __init__(self, filters: List[SkyDiveFilter]):
+        """
+        SkyDiveDataFilter constructor from a list of SkyDiveFilters
+        """
+        self._filters = filters
+
+    def _filter_names(self) -> List[str]:
+        return [f.name for f in self._filters]
+
+    def _get_filter(self, name) -> SkyDiveFilter:
+        for f in self._filters:
+            if f.name == name:
+                return f
+        raise SkyDiveFilterError('Filter not found: %s' % name)
+
+    def process_string(self, filter_str: str) -> None:
+        """
+        Run the filter The Filter Format is as follows:
+        Key1=Val1,Key2=Val2
+        The Conditions are ANDed
+
+        raises: SkyDiveFilterError if there is an
+        issue with the string format
+        """
+        self._processed = {}
+        if filter_str == "":
+            return
+
+        for filter_elem in filter_str.split(','):
+            filter_parts = filter_elem.split('=')
+            if len(filter_parts) != 2:
+                raise SkyDiveFilterError('Wrong filter format')
+            key = filter_parts[0]
+            val = filter_parts[1]
+            if not key or not val:
+                raise SkyDiveFilterError('Wrong filter format')
+            filter_obj = self._get_filter(key)
+
+            self._processed[filter_obj.key_name] = filter_obj.trans(val)
+
+    def generate_gremlin(self) -> str:
+        """
+        Generate a gremlin query string based on a the filter
+        """
+        gremlin_filters = []
+        if not self._processed:
+            return ""
+
+        for filter_key, filter_val in self._processed.items():
+            filter_val_str = "{}".format(filter_val)
+            gremlin_filters.append("'{}',{}".format(filter_key,
+                                                    filter_val_str))
 
         return '.Has({})'.format(
-            gremlin_filter) if len(gremlin_filter) > 0 else ""
-
+            ','.join(gremlin_filters) if len(gremlin_filters) > 0 else "")

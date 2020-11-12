@@ -1,7 +1,7 @@
 from typing import Dict, List, Any
 import pprint
 
-from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
+from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider, SkyDiveFilter, SkyDiveDataFilter
 from skynet.context import SkyNetCtxt
 from skynet.ovs.flows.ovs_printer import OVSFlowPrinter
 
@@ -47,24 +47,41 @@ class OFFLowData(SkyDiveData):
             fp.fprint(flow)
 
 
+class OFFlowFilter(SkyDiveDataFilter):
+    """
+    OFFLow-specific filters
+    """
+    def __init__(self):
+        filters = [
+            SkyDiveFilter("Table", int),
+            SkyDiveFilter("Cookie", SkyDiveFilter.string),
+            SkyDiveFilter("Priority", int),
+            SkyDiveFilter("Host", SkyDiveFilter.string)
+        ]
+        super(OFFlowFilter, self).__init__(filters)
+
+
 class OFFlowProvider(SkyDiveDataProvider):
     """
     OFFlowProvider is a provider for OpenFlowFlows
     """
     def __init__(self, ctxt: SkyNetCtxt):
         """
-        LSProvider constructor
+        OFFlowProvider constructor
         """
         super(OFFlowProvider, self).__init__(ctxt=ctxt)
 
-    def get(self, filter_dict: Dict[str, Any] = {}) -> OFFLowData:
-        gremlin_filter = self._gen_gremlin_filter(filter_dict)
+    def get(self, filter_obj: OFFlowFilter = None) -> OFFLowData:
+        """
+        Get the Openflow Flows based on a filter
+        """
+        gremlin_filter = filter_obj.generate_gremlin() if filter_obj else ""
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
 
-        query = "g.{at}V().Has('Type', 'ofrule'){filt}".format(at=at, filt=self._gen_gremlin_filter(filter_dict))
+        query = "g.{at}V().Has('Type', 'ofrule'){filt}".format(
+            at=at, filt=gremlin_filter)
 
         data = self._run_query(query)
 
         return OFFLowData(data)
-
