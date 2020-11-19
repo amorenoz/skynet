@@ -13,7 +13,7 @@ class LSPData(SkyDiveData):
         Metadata('OVN.Options', None, 'Options'),
         Metadata('OVN.Addresses', None, 'Addresses'),
         Metadata('OVN.Type', None, 'PortType'),
-        #Metadata('OVN.ExtID', None, 'ExtID'),
+        Metadata('OVN.ExtID', None, 'ExtID'),
     ]
     """
     LSPData represents Logical Switch Port Data
@@ -37,10 +37,21 @@ class LSPProvider(SkyDiveDataProvider):
         """
         super(LSPProvider, self).__init__(ctxt=ctxt)
 
-    def list(self) -> LSPData:
+    def list(self, switch: str) -> LSPData:
+        """
+        List the Logical Switch Ports from a given switch
+        Args:
+            switch: (optional) specify a switch
+        """
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
 
-        query = "g.{at}V().Has('Type', 'logical_switch_port')".format(at=at)
+        query = "g.{at}V()".format(at=at)
+
+        if switch:
+            query += ".Has('Type', 'logical_switch').HasEither('UUID', '{switch}', 'Name', '{switch}').Out()".format(
+                switch=switch)
+
+        query += ".Has('Type', 'logical_switch_port')"
         data = self._run_query(query)
         return LSPData(data)
