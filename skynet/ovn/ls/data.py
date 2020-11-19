@@ -10,6 +10,7 @@ class LSData(SkyDiveData):
         Metadata('Type'),
         Metadata('Name'),
         Metadata('UUID'),
+        Metadata('OVN.ExtID', None, 'ExtID')
     ]
     """
     LSData represents Logical Switch Data
