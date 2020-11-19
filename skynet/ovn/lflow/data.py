@@ -51,7 +51,7 @@ class LFlowProvider(SkyDiveDataProvider):
         """
         super(LFlowProvider, self).__init__(ctxt=ctxt)
 
-    def get(self, filter_obj: LFlowFilter = None) -> LFlowData:
+    def list(self, filter_obj: LFlowFilter = None) -> LFlowData:
 
         gremlin_filter = filter_obj.generate_gremlin() if filter_obj else ""
         at = "At('%s')." % self._ctxt.options().get(

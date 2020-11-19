@@ -46,7 +46,7 @@ def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
     """
     filter_obj = OFFlowFilter()
     filter_obj.process_string(filter)
-    flows = OFFlowProvider(obj).get(filter_obj)
+    flows = OFFlowProvider(obj).list(filter_obj)
     if format == "text":
         print(flows.to_text())
     elif format == "json":

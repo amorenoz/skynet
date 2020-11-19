@@ -38,7 +38,7 @@ class NodeProvider(SkyDiveDataProvider):
         """
         super(NodeProvider, self).__init__(ctxt=ctxt)
 
-    def get(self) -> NodeData:
+    def list(self) -> NodeData:
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
 

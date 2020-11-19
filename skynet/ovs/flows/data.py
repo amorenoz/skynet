@@ -71,7 +71,7 @@ class OFFlowProvider(SkyDiveDataProvider):
         """
         super(OFFlowProvider, self).__init__(ctxt=ctxt)
 
-    def get(self, filter_obj: OFFlowFilter = None) -> OFFLowData:
+    def list(self, filter_obj: OFFlowFilter = None) -> OFFLowData:
         """
         Get the Openflow Flows based on a filter
         """

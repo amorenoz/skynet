@@ -20,5 +20,5 @@ def list(obj: SkyNetCtxt) -> None:
     List existing nodes
     """
     print(
-        NodeProvider(obj).get().to_string(
+        NodeProvider(obj).list().to_string(
             ['ClusterName', 'Kernel', 'InternalIP', 'Hostname']))

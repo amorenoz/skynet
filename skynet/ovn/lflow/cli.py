@@ -29,7 +29,7 @@ def list(obj: SkyNetCtxt, filter: str = "") -> None:
     """
     filter_obj = LFlowFilter()
     filter_obj.process_string(filter)
-    flow_data = LFlowProvider(obj).get(filter_obj)
+    flow_data = LFlowProvider(obj).list(filter_obj)
     if not flow_data.is_empty():
         print(flow_data.data().to_string(columns=[
             'Match', 'Actions', 'Pipeline', 'Priority', 'Table', 'Datapath'

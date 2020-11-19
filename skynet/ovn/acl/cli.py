@@ -20,5 +20,5 @@ def list(obj: SkyNetCtxt) -> None:
     List ACLs
     """
     print(
-        ACLProvider(obj).get().to_string(
+        ACLProvider(obj).list().to_string(
             ["Name", 'Host', 'Match', 'Direction', 'Action']))

@@ -37,7 +37,7 @@ class LSPProvider(SkyDiveDataProvider):
         """
         super(LSPProvider, self).__init__(ctxt=ctxt)
 
-    def get(self) -> LSPData:
+    def list(self) -> LSPData:
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
 

@@ -35,7 +35,7 @@ class ACLProvider(SkyDiveDataProvider):
         """
         super(ACLProvider, self).__init__(ctxt=ctxt)
 
-    def get(self) -> ACLData:
+    def list(self) -> ACLData:
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
 

@@ -34,7 +34,7 @@ class LRProvider(SkyDiveDataProvider):
         """
         super(LRProvider, self).__init__(ctxt=ctxt)
 
-    def get(self) -> LRData:
+    def list(self) -> LRData:
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
 

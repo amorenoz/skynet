@@ -17,7 +17,7 @@ def list(obj: SkyNetCtxt) -> None:
     """
     List Logical Routers
     """
-    print(LRProvider(obj).get().to_string(["Name", 'Host', 'ExtID']))
+    print(LRProvider(obj).list().to_string(["Name", 'Host', 'ExtID']))
 
 
 

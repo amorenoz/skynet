@@ -8,17 +8,17 @@ from skynet.ovn.lsp.data import LSPProvider
 @click.pass_obj
 def lspcli(obj: SkyNetCtxt) -> None:
     """
-    Logical Switch Pororts commands
+    Logical Switch Ports commands
     """
     pass
 
 
 @lspcli.command()
 @click.pass_obj
-def list(obj: SkyNetCtxt) -> None:
+def list(obj: SkyNetCtxt, switch: str) -> None:
     """
     List Logical Switch Ports
     """
     print(
-        LSPProvider(obj).get().to_string(
+        LSPProvider(obj).list().to_string(
             ["Name", 'PortType', 'Addresses', 'Options']))

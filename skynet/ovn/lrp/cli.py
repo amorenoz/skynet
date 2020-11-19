@@ -20,5 +20,5 @@ def list(obj: SkyNetCtxt) -> None:
     List Logical Router Ports
     """
     print(
-        LRPProvider(obj).get().to_string(
+        LRPProvider(obj).list().to_string(
             columns=["Name", 'MAC', 'Enabled', 'Networks']))

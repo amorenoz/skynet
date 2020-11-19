@@ -19,4 +19,4 @@ def list(obj: SkyNetCtxt) -> None:
     """
     List Datapath Bindings
     """
-    print(DatapathProvider(obj).get().to_string([ 'TunnelKey', 'ExtID']))
+    print(DatapathProvider(obj).list().to_string([ 'TunnelKey', 'ExtID']))

@@ -19,4 +19,4 @@ def list(obj: SkyNetCtxt) -> None:
     """
     List Logical Switches
     """
-    print(LSProvider(obj).get().to_string(["Name", 'Host', 'ExtID']))
+    print(LSProvider(obj).list().to_string(["Name", 'Host', 'ExtID']))
