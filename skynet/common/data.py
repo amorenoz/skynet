@@ -31,8 +31,10 @@ class Metadata:
         value = data.get('Metadata')
         for key in self.name.split('.'):
             if not value:
-                raise Exception("key {} not found in dictionary {}".format(
+                logging.getLogger("Data").debug("key {} not found in dictionary {}".format(
                     self.name, data))
+                continue
+
             value = value.get(key)
 
         return self.trans(value) if self.trans else value
