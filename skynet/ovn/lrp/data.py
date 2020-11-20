@@ -1,5 +1,4 @@
 from typing import Dict, List, Any
-from pandas import DataFrame
 
 from skynet.context import SkyNetCtxt
 from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
@@ -42,10 +41,7 @@ class LRPProvider(SkyDiveDataProvider):
         Args:
             switch: (optional) specify a switch
         """
-        at = "At('%s')." % self._ctxt.options().get(
-            'at') if self._ctxt.options().get('at') else ''
-
-        query = "g.{at}V()".format(at=at)
+        query = "V()"
 
         if router:
             query += ".Has('Type', 'logical_router').HasEither('UUID', '{router}', 'Name', '{router}').Out()".format(

@@ -35,9 +35,6 @@ class LRProvider(SkyDiveDataProvider):
         super(LRProvider, self).__init__(ctxt=ctxt)
 
     def list(self) -> LRData:
-        at = "At('%s')." % self._ctxt.options().get(
-            'at') if self._ctxt.options().get('at') else ''
-
-        query = "g.{at}V().Has('Type', 'logical_router')".format(at=at)
+        query = "V().Has('Type', 'logical_router')"
         data = self._run_query(query)
         return LRData(data)

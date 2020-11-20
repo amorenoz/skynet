@@ -76,11 +76,7 @@ class OFFlowProvider(SkyDiveDataProvider):
         Get the Openflow Flows based on a filter
         """
         gremlin_filter = filter_obj.generate_gremlin() if filter_obj else ""
-        at = "At('%s')." % self._ctxt.options().get(
-            'at') if self._ctxt.options().get('at') else ''
-
-        query = "g.{at}V().Has('Type', 'ofrule'){filt}".format(
-            at=at, filt=gremlin_filter)
+        query = "V().Has('Type', 'ofrule'){filt}".format(filt=gremlin_filter)
 
         data = self._run_query(query)
 

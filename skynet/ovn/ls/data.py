@@ -1,5 +1,4 @@
 from typing import Dict, List, Any
-from pandas import DataFrame
 
 from skynet.context import SkyNetCtxt
 from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
@@ -35,9 +34,6 @@ class LSProvider(SkyDiveDataProvider):
         super(LSProvider, self).__init__(ctxt=ctxt)
 
     def list(self) -> LSData:
-        at = "At('%s')." % self._ctxt.options().get(
-            'at') if self._ctxt.options().get('at') else ''
-
-        query = "g.{at}V().Has('Type', 'logical_switch')".format(at=at)
+        query = "V().Has('Type', 'logical_switch')"
         data = self._run_query(query)
         return LSData(data)

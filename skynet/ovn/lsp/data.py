@@ -43,10 +43,7 @@ class LSPProvider(SkyDiveDataProvider):
         Args:
             switch: (optional) specify a switch
         """
-        at = "At('%s')." % self._ctxt.options().get(
-            'at') if self._ctxt.options().get('at') else ''
-
-        query = "g.{at}V()".format(at=at)
+        query = "V()"
 
         if switch:
             query += ".Has('Type', 'logical_switch').HasEither('UUID', '{switch}', 'Name', '{switch}').Out()".format(

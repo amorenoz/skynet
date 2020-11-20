@@ -1,5 +1,4 @@
 from typing import Dict, List, Any
-from pandas import DataFrame
 
 from skynet.context import SkyNetCtxt
 from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
@@ -36,10 +35,7 @@ class ACLProvider(SkyDiveDataProvider):
         super(ACLProvider, self).__init__(ctxt=ctxt)
 
     def list(self) -> ACLData:
-        at = "At('%s')." % self._ctxt.options().get(
-            'at') if self._ctxt.options().get('at') else ''
-
-        query = "g.{at}V().Has('Type', 'acl')".format(at=at)
+        query = "V().Has('Type', 'acl')"
         data = self._run_query(query)
 
         return ACLData(data)

@@ -39,10 +39,10 @@ class NodeProvider(SkyDiveDataProvider):
         super(NodeProvider, self).__init__(ctxt=ctxt)
 
     def list(self) -> NodeData:
-        at = "At('%s')." % self._ctxt.options().get(
-            'at') if self._ctxt.options().get('at') else ''
-
-        query = "g.{at}V().Has('Type', 'node')".format(at=at)
+        """
+        List Kubernetes Nodes
+        """
+        query = "V().Has('Type', 'node')"
 
         data = self._run_query(query)
         return NodeData(data)
