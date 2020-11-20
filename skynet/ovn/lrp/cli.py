@@ -14,11 +14,17 @@ def lrpcli(obj: SkyNetCtxt) -> None:
 
 
 @lrpcli.command()
+@click.option('-r',
+              '--router',
+              'router',
+              help='Only list the Logical Ports corresponding to '
+              'the specified Logical Router'
+              '(Either name or UUID are acceptable values)')
 @click.pass_obj
-def list(obj: SkyNetCtxt) -> None:
+def list(obj: SkyNetCtxt, router: str) -> None:
     """
     List Logical Router Ports
     """
     print(
-        LRPProvider(obj).list().to_string(
+        LRPProvider(obj).list(router).to_string(
             columns=["Name", 'MAC', 'Enabled', 'Networks']))

@@ -36,10 +36,21 @@ class LRPProvider(SkyDiveDataProvider):
         """
         super(LRPProvider, self).__init__(ctxt=ctxt)
 
-    def list(self) -> LRPData:
+    def list(self, router: str) -> LRPData:
+        """
+        List the Logical Router Ports from a given router
+        Args:
+            switch: (optional) specify a switch
+        """
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
 
-        query = "g.{at}V().Has('Type', 'logical_router_port')".format(at=at)
+        query = "g.{at}V()".format(at=at)
+
+        if router:
+            query += ".Has('Type', 'logical_router').HasEither('UUID', '{router}', 'Name', '{router}').Out()".format(
+                router=router)
+
+        query += ".Has('Type', 'logical_router_port')"
         data = self._run_query(query)
         return LRPData(data)
