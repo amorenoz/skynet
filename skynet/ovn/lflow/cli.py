@@ -19,6 +19,7 @@ def lflowcli(obj: SkyNetCtxt) -> None:
 def list(obj: SkyNetCtxt, filter: str = "") -> None:
     """
     List Logical Flows
+
     \b
     FILTER is a Filter string formatted as "Filter1=Value1,Filter2=Value2,..."
     Supported Filters:

@@ -1,8 +1,7 @@
 from typing import Dict, List, Any
-from pandas import DataFrame
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
+from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider, SkyDiveFilter, SkyDiveDataFilter
 
 
 class DatapathData(SkyDiveData):
@@ -20,8 +19,23 @@ class DatapathData(SkyDiveData):
         DatapathData constructor
         """
         super(DatapathData, self).__init__(data=data,
-                                     meta=self.METADATA,
-                                     index="Name")
+                                           meta=self.METADATA,
+                                           index="Name")
+
+
+class DatapathFilter(SkyDiveDataFilter):
+    """
+    Logical Flow filters
+    """
+    def __init__(self):
+        filters = [
+            SkyDiveFilter('TunnelKey', int, 'OVN.TunnelKey'),
+            SkyDiveFilter('Switch', SkyDiveFilter.string,
+                          'OVN.ExtID.logical-switch'),
+            SkyDiveFilter('Router', SkyDiveFilter.string,
+                          'OVN.ExtID.logical-router'),
+        ]
+        super(DatapathFilter, self).__init__(filters)
 
 
 class DatapathProvider(SkyDiveDataProvider):
@@ -34,10 +48,13 @@ class DatapathProvider(SkyDiveDataProvider):
         """
         super(DatapathProvider, self).__init__(ctxt=ctxt)
 
-    def list(self) -> DatapathData:
+    def list(self, filter_obj: DatapathFilter) -> DatapathData:
+        gremlin_filter = filter_obj.generate_gremlin() if filter_obj else ""
+
         at = "At('%s')." % self._ctxt.options().get(
             'at') if self._ctxt.options().get('at') else ''
 
-        query = "g.{at}V().Has('Type', 'datapath_binding')".format(at=at)
+        query = "g.{at}V().Has('Type', 'datapath_binding'){filt}".format(
+            at=at, filt=gremlin_filter)
         data = self._run_query(query)
         return DatapathData(data)
