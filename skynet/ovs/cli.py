@@ -4,6 +4,7 @@ from typing import Dict, List, Any
 
 from skynet.context import SkyNetCtxt
 from skynet.ovs.flows.data import OFFLowData, OFFlowProvider, OFFlowFilter
+from skynet.ovs.bridge.cli import bridgecli
 
 
 @click.group(name='ovs')
@@ -57,3 +58,4 @@ def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
         print(flows.to_ovs())
 
 ovscli.add_command(flowscli)
+ovscli.add_command(bridgecli)
