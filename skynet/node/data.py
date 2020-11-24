@@ -1,5 +1,4 @@
 from typing import Dict, List, Any
-from pandas import DataFrame
 
 from skynet.context import SkyNetCtxt
 from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
