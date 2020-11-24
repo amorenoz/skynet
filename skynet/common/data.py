@@ -151,7 +151,7 @@ class SkyDiveDataProvider:
         """
         self._ctxt = ctxt
 
-    def _run_query(self, query: str) -> List[Dict[str, Any]]:
+    def _run_query(self, query: str) -> Any:
         """
         Run a Skydive Query
         Args:
@@ -168,7 +168,8 @@ class SkyDiveDataProvider:
         log = logging.getLogger("Data")
         log.debug('Query: %s' % full_query)
         data = self._ctxt.rest_cli().lookup(full_query)
-        log.debug('Result len: %i' % len(data))
+        if isinstance(data, list):
+            log.debug('Result len: %i' % len(data))
 
         return data
 
