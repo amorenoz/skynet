@@ -1,4 +1,5 @@
 import click
+import textwrap
 
 from skynet.context import SkyNetCtxt
 from skynet.k8s.data import K8sProvider, K8sFilter
@@ -43,6 +44,29 @@ def listpods(obj: SkyNetCtxt, filter: str) -> None:
             'HostIP'
         ]))
 
+@podcli.command(name='get')
+@click.argument('uid', required=True)
+@click.pass_obj
+def getpod(obj: SkyNetCtxt, uid: str) -> None:
+    """
+    List Pods
+
+    \b
+    POD must be the UID of a pod
+    """
+    indent_str = ' '
+
+    pod = K8sProvider(obj).get_pod(uid)
+
+    print(pod.pod.data().iloc[0].to_string())
+    print('Containers:')
+    for uid, container in pod.containers.data().iterrows():
+        print(textwrap.indent(container.to_string(), indent_str * 4))
+
+    print('Logical Switch Port:')
+    print(textwrap.indent(pod.lsp.data().iloc[0].to_string(), indent_str * 4))
+    print('Veth Interface ')
+    print(textwrap.indent(pod.iface.data().iloc[0].to_string(), indent_str * 4))
 
 @click.group(name='container')
 @click.pass_obj

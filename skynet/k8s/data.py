@@ -2,6 +2,8 @@ from typing import Optional, Dict, Any, List
 
 from skynet.context import SkyNetCtxt
 from skynet.common.data import SkyDiveDataProvider, SkyDiveData, Metadata, SkyDiveFilter, SkyDiveDataFilter
+from skynet.ovn.lsp.data import LSPData
+from skynet.ovs.bridge.data import OvSIfaceData
 
 
 class PodData(SkyDiveData):
@@ -41,6 +43,47 @@ class ContainerData(SkyDiveData):
         super(ContainerData, self).__init__(data=data,
                                             meta=self.METADATA,
                                             index="ID")
+
+
+class Pod():
+    """
+    Pod encapsulates the detail information of a Pod from a skydive query
+    It has three properties:
+        pod: The pod information (PodData)
+        containers: The pod information (ContainerData)
+        lsp: The logical switch port connected to the pod LSPData
+        netns: The network namespace of the pod
+        iface: The OvS Interface connected to the pod
+    """
+    def __init__(self, pod_data: List[Dict[str, Any]],
+                 container_data: List[Dict[str, Any]],
+                 lsp_data: List[Dict[str, Any]], veth_data: List[Dict[str,
+                                                                      Any]]):
+        """
+        """
+        self._pod = PodData(pod_data)
+
+        self._containers = ContainerData(container_data)
+
+        self._lsp = LSPData(lsp_data)
+
+        self._iface = OvSIfaceData(veth_data)
+
+    @property
+    def pod(self) -> PodData:
+        return self._pod
+
+    @property
+    def lsp(self) -> LSPData:
+        return self._lsp
+
+    @property
+    def iface(self) -> OvSIfaceData:
+        return self._iface
+
+    @property
+    def containers(self) -> ContainerData:
+        return self._containers
 
 
 class K8sFilter(SkyDiveDataFilter):
@@ -83,3 +126,37 @@ class K8sProvider(SkyDiveDataProvider):
             filt=gremlin_filter)
         data = self._run_query(query)
         return ContainerData(data)
+
+    def get_pod(self, pod: str) -> Pod:
+        """
+        Get Pod details
+        """
+        query = "V().Has('Manager', 'k8s', 'Type', 'pod', 'ID', '{pod}')".format(
+            pod=pod)
+
+        pod_data = self._run_query(query)
+
+        if len(pod_data) == 0:
+            raise Exception('Pod not found')
+
+        query += ".Out()"
+        pod_out_data = self._run_query(query)
+
+        container_data = list(
+            filter(lambda d: d['Metadata']['Type'] == 'container',
+                   pod_out_data))
+
+        lsp_data = list(
+            filter(lambda d: d['Metadata']['Type'] == 'logical_switch_port',
+                   pod_out_data))
+
+        if len(lsp_data) > 0:
+            lsp_name = lsp_data[0]['Metadata']['Name']
+
+            veth_query = "V().Has('Type', 'veth', 'ExtID.iface-id', '{iface_id}')".format(
+                iface_id=lsp_name)
+
+            veth_data = self._run_query(veth_query)
+
+
+        return Pod(pod_data, container_data, lsp_data, veth_data)
