@@ -7,6 +7,7 @@ from skynet.ovs.cli import ovscli
 from skynet.node.cli import nodecli
 from skynet.summary import summary
 from skynet.host.cli import hostcli
+from skynet.k8s.cli import k8scli
 
 
 @click.group()
@@ -45,3 +46,4 @@ maincli.add_command(ovscli)
 maincli.add_command(nodecli)
 maincli.add_command(hostcli)
 maincli.add_command(summary)
+maincli.add_command(k8scli)
