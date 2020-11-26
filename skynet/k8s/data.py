@@ -2,7 +2,7 @@ from typing import Optional, Dict, Any, List
 
 from skynet.context import SkyNetCtxt
 from skynet.common.data import SkyDiveDataProvider, SkyDiveData, Metadata, SkyDiveFilter, SkyDiveDataFilter
-from skynet.ovn.lsp.data import LSPData
+from skynet.ovn.lsp.model import LSPData
 from skynet.ovs.bridge.data import OvSIfaceData
 
 
