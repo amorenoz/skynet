@@ -248,10 +248,10 @@ class SkyDiveDataFilter:
 
         for filter_elem in filter_str.split(','):
             filter_parts = filter_elem.split('=')
-            if len(filter_parts) != 2:
+            if len(filter_parts) < 2:
                 raise SkyDiveFilterError('Wrong filter format')
             key = filter_parts[0]
-            val = filter_parts[1]
+            val = filter_elem[len(key)+1:]
             if not key or not val:
                 raise SkyDiveFilterError('Wrong filter format')
             filter_obj = self._get_filter(key)
