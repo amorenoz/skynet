@@ -1,6 +1,7 @@
 import click
 import textwrap
 
+from skynet.common.printers import SeriesPrinter
 from skynet.context import SkyNetCtxt
 from skynet.k8s.data import K8sProvider, K8sFilter
 
@@ -54,19 +55,30 @@ def getpod(obj: SkyNetCtxt, uid: str) -> None:
     \b
     POD must be the UID of a pod
     """
-    indent_str = ' '
-
     pod = K8sProvider(obj).get_pod(uid)
 
-    print(pod.pod.data().iloc[0].to_string())
-    print('Containers:')
-    for uid, container in pod.containers.data().iterrows():
-        print(textwrap.indent(container.to_string(), indent_str * 4))
+    sprint = SeriesPrinter()
+    if pod.pod.is_empty():
+        print('Pod not found')
+        return
 
+    print(sprint.print(pod.pod.data().iloc[0]))
+    print('Containers:')
+    if pod.containers.is_empty():
+        print("no info available")
+    else:
+        for _, container in pod.containers.data().iterrows():
+            print(sprint.print(container, 4))
     print('Logical Switch Port:')
-    print(textwrap.indent(pod.lsp.data().iloc[0].to_string(), indent_str * 4))
+    if pod.lsp.is_empty():
+        print("no info available")
+    else:
+        print(sprint.print(pod.lsp.data().iloc[0], 4))
     print('Veth Interface ')
-    print(textwrap.indent(pod.iface.data().iloc[0].to_string(), indent_str * 4))
+    if pod.iface.is_empty():
+        print("no info availablle")
+    else:
+        print(sprint.print(pod.iface.data().iloc[0], 4))
 
 @click.group(name='container')
 @click.pass_obj
