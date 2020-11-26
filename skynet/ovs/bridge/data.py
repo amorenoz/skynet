@@ -129,18 +129,19 @@ class OvSIfaceData(SkyDiveData):
         OvSIfaceData constructor from skydive data
         """
         # Assume all interfaces are the same type
-        iface_type = data[0]['Metadata']['Type']
         meta = self.COMMON_METADATA
-        if iface_type == "patch":
-            meta.extend(self.PATCH_METADATA)
-        elif iface_type == "geneve":
-            meta.extend(self.GENEVE_METADATA)
-        elif iface_type == "internal":
-            meta.extend(self.INTERNAL_METADATA)
-        elif iface_type == "veth":
-            meta.extend(self.VETH_METADATA)
-        else:
-            raise Exception('Unknown Interface type %s' % iface_type)
+        if len(data) > 0:
+            iface_type = data[0]['Metadata']['Type']
+            if iface_type == "patch":
+                meta.extend(self.PATCH_METADATA)
+            elif iface_type == "geneve":
+                meta.extend(self.GENEVE_METADATA)
+            elif iface_type == "internal":
+                meta.extend(self.INTERNAL_METADATA)
+            elif iface_type == "veth":
+                meta.extend(self.VETH_METADATA)
+            else:
+                raise Exception('Unknown Interface type %s' % iface_type)
 
         super(OvSIfaceData, self).__init__(data=data, meta=meta, index="ID")
 
@@ -202,8 +203,6 @@ class OvSBridge():
         G.V('61f44ac8-c5e3-457b-64dc-c7dbf0a7c1a5').Descendants().HasEither('Type', 'ovsport','Type', 'ovsbridge').OutE().Has('RelationType', 'layer2').Subgraph()
 
         should be enough to build this.
-        However, patch interfaces do not appear to be under "ovsport":
-            https://github.com/skydive-project/skydive/issues/2292
         """
 
         self._bridge = OvSBridgeData([
