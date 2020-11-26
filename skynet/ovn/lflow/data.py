@@ -36,7 +36,9 @@ class LFlowFilter(SkyDiveDataFilter):
         filters = [
             SkyDiveFilter("Table", int, "OVN.Table"),
             SkyDiveFilter("Datapath", lambda x: "Regex('{}.*')".format(x),
-                          "OVN.LogicalDataPath")
+                          "OVN.LogicalDataPath"),
+            SkyDiveFilter("Match", SkyDiveFilter.regex, "OVN.LFMatch"),
+            SkyDiveFilter("Actions", SkyDiveFilter.regex, "OVN.LFActions")
         ]
         super(LFlowFilter, self).__init__(filters)
 
