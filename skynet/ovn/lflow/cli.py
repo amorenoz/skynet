@@ -32,6 +32,7 @@ def list(obj: SkyNetCtxt, filter: str = "", format: str = "table") -> None:
     Supported Filters:
         Datapath    [datapath] (full or first 8bytes)
         Table       [tableNum] (table number)
+        Pipeline    [Pipeline string]
         Match       [Match Regex]
         Actions     [Actions Regex]
     E.g: Datapath=c51244a5-1620-4a7a-ae1e-c4b882e46aae
