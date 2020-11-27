@@ -25,7 +25,7 @@ class DatapathData(SkyDiveData):
 
 class DatapathFilter(SkyDiveDataFilter):
     """
-    Logical Flow filters
+    DatapathFilter filters
     """
     def __init__(self):
         filters = [
