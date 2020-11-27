@@ -2,6 +2,7 @@ import click
 
 from skynet.context import SkyNetCtxt
 from skynet.ovn.lflow.data import LFlowProvider, LFlowFilter
+from skynet.ovn.lflow.ovn_printer import OVNFLowPrinter
 from skynet.common.printers import SeriesPrinter
 
 
@@ -20,7 +21,7 @@ def lflowcli(obj: SkyNetCtxt) -> None:
     '--format',
     '-f',
     default="table",
-    help='Specify an output format: [table (default), text, json, html]')
+    help='Specify an output format: [table (default), text, json, html, ovn]')
 @click.argument('filter', required=False, default="")
 def list(obj: SkyNetCtxt, filter: str = "", format: str = "table") -> None:
     """
@@ -56,3 +57,6 @@ def list(obj: SkyNetCtxt, filter: str = "", format: str = "table") -> None:
             print(flow_data.data().to_json(orient='records'))
         elif format == "html":
             print(flow_data.data().to_html())
+        elif format == "ovn":
+            fp = OVNFLowPrinter()
+            print(fp.fformat_all(flow_data))
