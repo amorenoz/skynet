@@ -2,6 +2,7 @@ import click
 
 from skynet.context import SkyNetCtxt
 from skynet.ovn.lflow.data import LFlowProvider, LFlowFilter
+from skynet.common.printers import SeriesPrinter
 
 
 @click.group(name='lflow')
@@ -15,8 +16,13 @@ def lflowcli(obj: SkyNetCtxt) -> None:
 
 @lflowcli.command()
 @click.pass_obj
+@click.option(
+    '--format',
+    '-f',
+    default="table",
+    help='Specify an output format: [table (default), text, json, html]')
 @click.argument('filter', required=False, default="")
-def list(obj: SkyNetCtxt, filter: str = "") -> None:
+def list(obj: SkyNetCtxt, filter: str = "", format: str = "table") -> None:
     """
     List Logical Flows
 
@@ -29,15 +35,24 @@ def list(obj: SkyNetCtxt, filter: str = "") -> None:
         Actions     [Actions Regex]
     E.g: Datapath=c51244a5-1620-4a7a-ae1e-c4b882e46aae
          Datapath=c51244a5,Table=12,Match='eth.src == c2.*'
-         Actions='drop'
+         Actions='drop;'
 
     """
     filter_obj = LFlowFilter()
     filter_obj.process_string(filter)
     flow_data = LFlowProvider(obj).list(filter_obj)
     if not flow_data.is_empty():
-        print(flow_data.data().to_string(columns=[
-            'Match', 'Actions', 'Pipeline', 'Priority', 'Table', 'Datapath'
-        ],
-                                         justify="left",
-                                         max_colwidth=60))
+        if not format or format == "table":
+            print(flow_data.data().to_string(columns=[
+                'Match', 'Actions', 'Pipeline', 'Priority', 'Table', 'Datapath'
+            ],
+                                             justify="left",
+                                             max_colwidth=60))
+        elif format == "text":
+            sp = SeriesPrinter()
+            for _, series in flow_data.data().iterrows():
+                print(sp.print(series))
+        elif format == "json":
+            print(flow_data.data().to_json(orient='records'))
+        elif format == "html":
+            print(flow_data.data().to_html())
