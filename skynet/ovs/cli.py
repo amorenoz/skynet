@@ -30,7 +30,7 @@ def flowscli(obj: SkyNetCtxt) -> None:
 @click.option('--format',
               '-f',
               default="text",
-              help='Specify an alternative output format: [json, html]')
+              help='Specify an alternative output format: [ovs, json, html]')
 @click.argument('filter', required=False, default="")
 def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
     """
@@ -43,7 +43,20 @@ def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
         Cookie:     [Cookie]
         Table:      [Table Num]
         Priority    [Priority Num]
+        Match filters:
+            eth_src
+            eth_dst
+            ipv4_dst
+            ipv4_src
+            eth_type
+            tcp_dst
+            tcp_src
+            ip_proto
+            eth_type
+            in_port
+
     E.g Host=mynode1.cluster,Cookie='0x12334',Table=3
+    Host=mynode,in_port=4,ipv4_addr=192.168.1.1
     """
     filter_obj = OFFlowFilter()
     filter_obj.process_string(filter)
@@ -51,11 +64,12 @@ def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
     if format == "text":
         print(flows.to_text())
     elif format == "json":
-        print(flows.to_json())
+        print(flows.to_json(orient='records'))
     elif format == "html":
         print(flows.to_html())
     elif format == "ovs":
         print(flows.to_ovs())
+
 
 ovscli.add_command(flowscli)
 ovscli.add_command(bridgecli)

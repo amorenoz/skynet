@@ -1,7 +1,8 @@
 from typing import Dict, List, Any
+from functools import partial
 import pprint
 
-from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider, SkyDiveFilter, SkyDiveDataFilter
+from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider, SkyDiveFilter, SkyDiveDataFilter, SkyDivePostFilter
 from skynet.context import SkyNetCtxt
 from skynet.ovs.flows.ovs_printer import OVSFlowPrinter
 
@@ -54,11 +55,45 @@ class OFFlowFilter(SkyDiveDataFilter):
     def __init__(self):
         filters = [
             SkyDiveFilter("Table", int),
-            SkyDiveFilter("Cookie", SkyDiveFilter.string),
+            SkyDiveFilter("Cookie", self.cookie),
             SkyDiveFilter("Priority", int),
             SkyDiveFilter("Host", SkyDiveFilter.string)
         ]
-        super(OFFlowFilter, self).__init__(filters)
+        post_filters = [
+            SkyDivePostFilter('eth_src', partial(self.field_match, 'eth_src'),
+                              None),
+            SkyDivePostFilter('eth_dst', partial(self.field_match, 'eth_dst'),
+                              None),
+            SkyDivePostFilter('ipv4_dst', partial(self.field_match,
+                                                  'ipv4_dst'), None),
+            SkyDivePostFilter('ipv4_src', partial(self.field_match,
+                                                  'ipv4_src'), None),
+            SkyDivePostFilter('eth_type', partial(self.field_match,
+                                                  'eth_type'), None),
+            SkyDivePostFilter('tcp_dst', partial(self.field_match, 'tcp_dst'),
+                              None),
+            SkyDivePostFilter('tcp_src', partial(self.field_match, 'tcp_src'),
+                              None),
+            SkyDivePostFilter('ip_proto', partial(self.field_match,
+                                                  'ip_proto'), None),
+            SkyDivePostFilter('eth_type', partial(self.field_match,
+                                                  'eth_type'), None),
+            SkyDivePostFilter('in_port', partial(self.field_match, 'in_port'),
+                              int),
+        ]
+
+        super(OFFlowFilter, self).__init__(filters, post_filters)
+
+    @classmethod
+    def cookie(cls, cookie: str) -> int:
+        return int(cookie, 16)
+
+    @classmethod
+    def field_match(cls, field_type: str, item: Dict, value: Any) -> bool:
+        return {
+            "Type": field_type,
+            "Value": value
+        } in item['Metadata']['Filters']
 
 
 class OFFlowProvider(SkyDiveDataProvider):
@@ -79,5 +114,6 @@ class OFFlowProvider(SkyDiveDataProvider):
         query = "V().Has('Type', 'ofrule'){filt}".format(filt=gremlin_filter)
 
         data = self._run_query(query)
+        processed_data = filter_obj.post_process(data) if filter_obj else data
 
-        return OFFLowData(data)
+        return OFFLowData(processed_data)
