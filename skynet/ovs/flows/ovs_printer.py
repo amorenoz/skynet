@@ -86,10 +86,19 @@ class OVSFlowPrinter():
         return self.action_printers.get(
             action_type) or self.default_action_printer
 
-    def fprint(self, flow: pandas.Series):
-        print(" ".join([
-            "=".join([key, str(flow[key])])
-            for key in ["Cookie", 'Priority', 'Table']
-        ] + ['match:{}'.format(self.printFilter(flow['Filters']))] + [
-            'actions:[ {act} ]'.format(act=self.printActions(flow['Actions']))
-        ]))
+    def fformat(self, flow: pandas.Series) -> str:
+        fstr = ""
+        fstr += "cookie={cookie}, duration=TBD, table={table:d}, n_packets={packets}, n_bytes={bytes}, priority={prio},".format(
+            cookie=flow.get('Cookie'),
+            table=flow.get('Table'),
+            packets=flow.get('Metric').get('RxPackets') or 0,
+            bytes=flow.get('Metric').get('RxBytes') or 0,
+            prio=flow.get('Priority'))
+
+        fstr += self.printFilter(flow['Filters'])
+        fstr += " actions={act}".format(act=self.printActions(flow['Actions']))
+
+        return fstr
+
+    def fprint(self, flow: pandas.Series) -> None:
+        print(self.fformat(flow))
