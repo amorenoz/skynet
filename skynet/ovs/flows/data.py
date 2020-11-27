@@ -23,6 +23,8 @@ class OFFLowData(SkyDiveData):
         super(OFFLowData, self).__init__(data=data,
                                          meta=self.METADATA,
                                          index="ID")
+        if not self.is_empty():
+            self._data.sort_values(['Table', 'Priority'], inplace=True)
 
     def to_text(self):
         """
