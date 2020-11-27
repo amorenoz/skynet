@@ -13,6 +13,8 @@ class LFlowData(SkyDiveData):
         Metadata('OVN.LFPriority', None, 'Priority'),
         Metadata('OVN.Pipeline', None, 'Pipeline'),
         Metadata('OVN.Table', None, 'Table'),
+        Metadata('OVN.ExtID.stage-name', None, 'Stage'),
+        Metadata('OVN.ExtID.source', None, 'Source'),
         Metadata('OVN.LogicalDataPath', lambda x: x[0:8]
                  if len(x) > 0 else None, 'Datapath'),
     ]
