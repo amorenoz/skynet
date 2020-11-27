@@ -25,32 +25,8 @@ spec:
             - containerPort: 8080
           command: ["python3"]
           args: [ "-m", "http.server", "8080"]
-          readinessProbe:
-            timeoutSeconds: 10
-            exec:
-              command:
-              - curl
-              - -sS
-              - --fail
-              - --connect-timeout
-              - "5"
-              - -o
-              - /dev/null
-              - localhost:8080
-          livenessProbe:
-            timeoutSeconds: 10
-            exec:
-              command:
-              - curl
-              - -sS
-              - --fail
-              - --connect-timeout
-              - "5"
-              - -o
-              - /dev/null
-              - localhost:8080
+
 ---
-## Http service
 apiVersion: v1
 kind: Service
 metadata:
@@ -94,29 +70,5 @@ spec:
           imagePullPolicy: IfNotPresent
           ports: []
           command: ["/bin/sh"]
-          args: [ "-c", "sleep 100000000"]
-          readinessProbe:
-            timeoutSeconds: 10
-            exec:
-              command:
-              - curl
-              - -sS
-              - --fail
-              - --connect-timeout
-              - "5"
-              - -o
-              - /dev/null
-              - echo-a:8080
-          livenessProbe:
-            timeoutSeconds: 10
-            exec:
-              command:
-              - curl
-              - -sS
-              - --fail
-              - --connect-timeout
-              - "5"
-              - -o
-              - /dev/null
-              - echo-a:8080
+          args: [ "-c", "while true; do curl echo-a:8080; curl echo-a:8081; sleep 2; done"]
 
