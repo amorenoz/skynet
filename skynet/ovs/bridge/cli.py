@@ -1,5 +1,4 @@
 import click
-import json
 import textwrap
 
 from skynet.context import SkyNetCtxt
