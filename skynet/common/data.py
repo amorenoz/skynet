@@ -31,8 +31,9 @@ class Metadata:
         value = data.get('Metadata')
         for key in self.name.split('.'):
             if not value:
-                logging.getLogger("Data").debug("key {} not found in dictionary {}".format(
-                    self.name, data))
+                logging.getLogger("Data").debug(
+                    "key {} not found in dictionary {}".format(
+                        self.name, data))
                 continue
 
             value = value.get(key)
@@ -178,6 +179,23 @@ class SkyDiveFilterError(Exception):
     pass
 
 
+class SkyDivePostFilter:
+    """
+    SkyDivePostFilter defines a filter that is performed after the data has been fetched
+    """
+    def __init__(self, name: str, func: Callable, trans: Any = None):
+        """
+        SkyDivePostFilter constructor
+        Args:
+            name: The name of the filter
+            func: A callable that must accept a value of type Any and return whether or not to select that item
+            trans: (optional) The name transformation to apply to the filter data before adding it to the gremlin filter
+        """
+        self.name = name
+        self.func = func
+        self.trans = trans if trans else SkyDiveFilter.noop
+
+
 class SkyDiveFilter:
     """
     SkyDiveFilter defines one filter information
@@ -213,25 +231,48 @@ class SkyDiveFilter:
         """
         return "'{}'".format(val)
 
+    @classmethod
+    def regex(cls, val):
+        """
+        Simple tranformation function that just single-quotes the string
+        """
+        return "Regex('{}')".format(val)
+
 
 class SkyDiveDataFilter:
     """
     SkyDiveFilter implements filtering on skydive queries
     """
-    def __init__(self, filters: List[SkyDiveFilter]):
+    def __init__(self,
+                 filters: List[SkyDiveFilter],
+                 post_filters: List[SkyDivePostFilter] = []):
         """
         SkyDiveDataFilter constructor from a list of SkyDiveFilters
         """
         self._filters = filters
+        self._post_filters = post_filters
+        self._processed: Dict[str, Any] = {}
+        self._post_processed: List[Dict[str, Any]] = []
 
     def _filter_names(self) -> List[str]:
         return [f.name for f in self._filters]
 
-    def _get_filter(self, name) -> SkyDiveFilter:
-        for f in self._filters:
-            if f.name == name:
-                return f
-        raise SkyDiveFilterError('Filter not found: %s' % name)
+    def _process_filter(self, key: str, val: str) -> None:
+        for filt in self._filters:
+            if filt.name == key:
+                self._processed[filt.key_name] = filt.trans(val)
+                return
+
+        if self._post_filters:
+            for post_filt in self._post_filters:
+                if post_filt.name == key:
+                    self._post_processed.append({
+                        "func": post_filt.func,
+                        "value": post_filt.trans(val),
+                    })
+                    return
+
+        raise SkyDiveFilterError('Filter not found: %s' % key)
 
     def process_string(self, filter_str: str) -> None:
         """
@@ -242,7 +283,6 @@ class SkyDiveDataFilter:
         raises: SkyDiveFilterError if there is an
         issue with the string format
         """
-        self._processed = {}
         if filter_str == "":
             return
 
@@ -251,12 +291,11 @@ class SkyDiveDataFilter:
             if len(filter_parts) < 2:
                 raise SkyDiveFilterError('Wrong filter format')
             key = filter_parts[0]
-            val = filter_elem[len(key)+1:]
+            val = filter_elem[len(key) + 1:]
             if not key or not val:
                 raise SkyDiveFilterError('Wrong filter format')
-            filter_obj = self._get_filter(key)
 
-            self._processed[filter_obj.key_name] = filter_obj.trans(val)
+            self._process_filter(key, val)
 
     def generate_gremlin(self) -> str:
         """
@@ -273,3 +312,15 @@ class SkyDiveDataFilter:
 
         return '.Has({})'.format(
             ','.join(gremlin_filters) if len(gremlin_filters) > 0 else "")
+
+    def post_process(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Applies post filters and retuns the resulting filtered data
+        """
+        if self._post_processed:
+            return list(
+                filter(
+                    lambda item: all(filt["func"](item, filt["value"])
+                                     for filt in self._post_processed), data))
+
+        return data
