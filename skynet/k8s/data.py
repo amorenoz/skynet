@@ -157,6 +157,8 @@ class K8sProvider(SkyDiveDataProvider):
                 iface_id=lsp_name)
 
             veth_data = self._run_query(veth_query)
+        else:
+            veth_data = []
 
 
         return Pod(pod_data, container_data, lsp_data, veth_data)
