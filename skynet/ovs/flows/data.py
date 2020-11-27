@@ -106,12 +106,22 @@ class OFFlowProvider(SkyDiveDataProvider):
         """
         super(OFFlowProvider, self).__init__(ctxt=ctxt)
 
-    def list(self, filter_obj: OFFlowFilter = None) -> OFFLowData:
+    def list(self, host: str = "", bridge: str = "", filter_obj: OFFlowFilter = None) -> OFFLowData:
         """
         Get the Openflow Flows based on a filter
         """
+        query = "V()"
         gremlin_filter = filter_obj.generate_gremlin() if filter_obj else ""
-        query = "V().Has('Type', 'ofrule'){filt}".format(filt=gremlin_filter)
+
+        if host:
+            query += ".Has('Type', 'host').HasEither('ID', '{host}', 'Name', '{host}').Out()".format(host=host)
+
+        if bridge:
+            query += ".Has('Type', 'ovsbridge').HasEither('ID', '{bridge}', 'Name', '{bridge}').Out()".format(bridge=bridge)
+        elif host:
+            query += ".Out()"
+
+        query += ".Has('Type', 'ofrule'){filt}".format(filt=gremlin_filter)
 
         data = self._run_query(query)
         processed_data = filter_obj.post_process(data) if filter_obj else data

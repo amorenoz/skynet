@@ -31,8 +31,16 @@ def flowscli(obj: SkyNetCtxt) -> None:
               '-f',
               default="text",
               help='Specify an alternative output format: [ovs, json, html]')
+@click.option('--bridge',
+              '-b',
+              default="",
+              help='Specify a bridge UID or name (note that the name of the bridge may not be unique)')
+@click.option('--host',
+              '-H',
+              default="",
+              help='Specify a host UUID or name')
 @click.argument('filter', required=False, default="")
-def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
+def list(obj: SkyNetCtxt, format, bridge: str = "", host: str = "", filter: str = "") -> None:
     """
     List the OVS flows
 
@@ -60,7 +68,7 @@ def list(obj: SkyNetCtxt, format, filter: str = "") -> None:
     """
     filter_obj = OFFlowFilter()
     filter_obj.process_string(filter)
-    flows = OFFlowProvider(obj).list(filter_obj)
+    flows = OFFlowProvider(obj).list(host, bridge, filter_obj)
     if format == "text":
         print(flows.to_text())
     elif format == "json":
