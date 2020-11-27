@@ -38,13 +38,15 @@ def get_bridge(obj: SkyNetCtxt, bridge: str) -> None:
     Get detail information from a bridge
     """
     iface_info = {
-        'internal': ['Type', 'Name', 'IPV4'],
-        'patch': ['Type', 'Name', 'Peer', 'LocalPort'],
-        'geneve':
-        ['Type', 'Name', 'MTU', 'TunEgressIface', 'TunEgressIfaceCarrier'],
+        'internal': ['Type', 'Name', 'OfPort', 'IPV4'],
+        'patch': ['Type', 'Name', 'OfPort', 'Peer', 'LocalPort'],
+        'geneve': [
+            'Type', 'Name', 'MTU', 'OfPort', 'TunEgressIface',
+            'TunEgressIfaceCarrier'
+        ],
         'veth': [
-            'Type', 'Name', 'State', 'IPAddress', 'AttachedMAC', 'Sandbox',
-            'IfaceID'
+            'Type', 'Name', 'OfPort', 'State', 'IPAddress', 'AttachedMAC',
+            'Sandbox', 'IfaceID'
         ],
     }
     indent_str = ' '
