@@ -6,9 +6,6 @@ from pandas import Series
 class SeriesPrinter():
     """
     Prints a pandas.Series
-    The series *must* contain at least the following keys:
-        Name
-        Type
     """
     INDENT_STR = " "
 
@@ -22,8 +19,8 @@ class SeriesPrinter():
             indent: The entire string is indented by this level
         """
         out = ""
-        header = "|Name: {n}\n|Type: {t}\n|ID: {i}\n".format(t=series['Type'],
-                                                             n=series['Name'],
+        header = "|Name: {n}\n|Type: {t}\n|ID: {i}\n".format(t=series.get('Type') or "_",
+                                                             n=series.get('Name') or "_",
                                                              i=series.name)
         out += header
 
