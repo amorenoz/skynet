@@ -29,7 +29,11 @@ class LFlowData(SkyDiveData):
                                         meta=self.METADATA,
                                         index="Name")
         if not self.is_empty():
-            self._data.sort_values(['Datapath', 'Pipeline', 'Table', 'Priority'], inplace=True)
+            self._data.sort_values(
+                by=['Datapath', 'Pipeline', 'Table', 'Priority'],
+                ascending=[True, True, True, False],
+                inplace=True)
+
 
 class LFlowFilter(SkyDiveDataFilter):
     """

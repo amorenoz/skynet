@@ -24,7 +24,7 @@ class OFFLowData(SkyDiveData):
                                          meta=self.METADATA,
                                          index="ID")
         if not self.is_empty():
-            self._data.sort_values(['Table', 'Priority'], inplace=True)
+            self._data.sort_values(by=['Table', 'Priority'], ascending=[True, False], inplace=True)
 
     def to_text(self):
         """
@@ -73,9 +73,9 @@ class OFFlowFilter(SkyDiveDataFilter):
             SkyDivePostFilter('eth_type', partial(self.field_match,
                                                   'eth_type'), None),
             SkyDivePostFilter('tcp_dst', partial(self.field_match, 'tcp_dst'),
-                              None),
+                              int),
             SkyDivePostFilter('tcp_src', partial(self.field_match, 'tcp_src'),
-                              None),
+                              int),
             SkyDivePostFilter('ip_proto', partial(self.field_match,
                                                   'ip_proto'), None),
             SkyDivePostFilter('eth_type', partial(self.field_match,
