@@ -10,7 +10,7 @@ from skynet.host.cli import hostcli
 from skynet.k8s.cli import k8scli
 
 
-@click.group()
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option(
     '--at',
     help='Specify a time in the past.'
