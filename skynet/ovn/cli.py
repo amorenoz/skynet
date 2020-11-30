@@ -31,13 +31,14 @@ def ovncli(obj: SkyNetCtxt) -> None:
 @click.pass_obj
 def topology(obj: SkyNetCtxt, namespace: str) -> None:
     """
-    Show the OVN logical topology
+    Print the OVN logical topology (.dot format)
     """
     graph = obj.rest_cli().lookup(
-        "V().Has('Manager', 'ovn').As('ovn').g.V().Has('Type', Within('pod')).Has('K8s.Namespace', '{name}').As('k8s').Select('ovn','k8s').Subgraph()"
+        "G.V().Has('Manager', 'ovn', 'Type', Within('logical_switch', 'logical_switch_port', 'logical_router', 'logical_router_port', 'acl'))."
+        "As('ovn').g.V().Has('Type', Within('pod')).Has('K8s.Namespace', '{name}').As('k8s').Select('ovn','k8s').Subgraph()"
         .format(name=namespace))
     dot = topo2dot('OVN Topology', graph[0])
-    dot.view()
+    print(dot)
 
 
 def topo2dot(name: str, graph: Dict[str, List[Any]]) -> Digraph:
