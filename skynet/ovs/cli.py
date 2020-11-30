@@ -31,16 +31,23 @@ def flowscli(obj: SkyNetCtxt) -> None:
               '-f',
               default="text",
               help='Specify an alternative output format: [ovs, json, html]')
+@click.option('--interactive',
+              '-i',
+              is_flag=True,
+              help='Drop an interactive iPython shell')
 @click.option('--bridge',
               '-b',
               default="",
-              help='Specify a bridge UID or name (note that the name of the bridge may not be unique)')
-@click.option('--host',
-              '-H',
-              default="",
-              help='Specify a host UUID or name')
+              help='Specify a bridge UID or name'
+              '(note that the name of the bridge may not be unique)')
+@click.option('--host', '-H', default="", help='Specify a host UUID or name')
 @click.argument('filter', required=False, default="")
-def list(obj: SkyNetCtxt, format, bridge: str = "", host: str = "", filter: str = "") -> None:
+def list(obj: SkyNetCtxt,
+         format: str,
+         interactive: bool,
+         bridge: str = "",
+         host: str = "",
+         filter: str = "") -> None:
     """
     List the OVS flows
 
@@ -77,6 +84,11 @@ def list(obj: SkyNetCtxt, format, bridge: str = "", host: str = "", filter: str 
         print(flows.to_html())
     elif format == "ovs":
         print(flows.to_ovs())
+
+    if interactive:
+        import IPython
+        IPython.embed(display_banner=
+                      'Access the Dataframe with the flows in "flows.data()"')
 
 
 ovscli.add_command(flowscli)

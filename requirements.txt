@@ -2,3 +2,4 @@ click
 skydive-client
 graphviz
 pandas
+ipython
