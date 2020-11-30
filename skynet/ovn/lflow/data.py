@@ -28,7 +28,8 @@ class LFlowData(SkyDiveData):
         super(LFlowData, self).__init__(data=data,
                                         meta=self.METADATA,
                                         index="Name")
-
+        if not self.is_empty():
+            self._data.sort_values(['Datapath', 'Pipeline', 'Table', 'Priority'], inplace=True)
 
 class LFlowFilter(SkyDiveDataFilter):
     """
