@@ -1,6 +1,6 @@
 ARG  BASE=fedora:29
 FROM $BASE
-RUN dnf install -y openvswitch libpcap \
+RUN dnf install -y openvswitch libpcap libvirt \
     && dnf clean all \
     && rm -rf /var/cache/yum
 COPY skydive /usr/bin/skydive

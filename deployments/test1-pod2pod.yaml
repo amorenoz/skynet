@@ -1,0 +1,74 @@
+# Deployment of a http server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-a 
+  labels:
+    name: echo-a 
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      name: echo-a
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: echo-a
+    spec:
+      hostNetwork: false
+      containers:
+        - name: echo-a-container
+          image: fedora
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          command: ["python3"]
+          args: [ "-m", "http.server", "8080"]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-a
+  labels:
+    name: echo-a
+    topology: any
+    component: network-check
+    traffic: internal
+    quarantine: "false"
+    type: autocheck
+spec:
+  ports:
+  - name: http
+    port: 8080
+  type: ClusterIP
+  selector:
+    name: echo-a
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-to-a 
+  labels:
+    name: pod-to-a 
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      name: pod-to-a
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: pod-to-a
+    spec:
+      hostNetwork: false
+      containers:
+        - name: pod-to-a-container
+          image: fedora
+          imagePullPolicy: IfNotPresent
+          ports: []
+          command: ["/bin/sh"]
+          args: [ "-c", "while true; do curl echo-a:8080; curl echo-a:8081; sleep 2; done"]
+

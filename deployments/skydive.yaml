@@ -60,7 +60,9 @@ data:
   SKYDIVE_ANALYZER_TOPOLOGY_BACKEND: elasticsearch
   SKYDIVE_ANALYZER_TOPOLOGY_PROBES: k8s ovn
   SKYDIVE_OVS_OFLOW_ENABLE: "true"
-  SKYDIVE_ANALYZER_TOPOLOGY_OVN_ADDRESS: "tcp:ovnkube-db.ovn-kubernetes.svc.cluster.local:6641"
+  SKYDIVE_ANALYZER_TOPOLOGY_OVN_NB_ADDRESS: "tcp:ovnkube-db.ovn-kubernetes.svc.cluster.local:6641"
+  SKYDIVE_ANALYZER_TOPOLOGY_OVN_SB_ADDRESS: "tcp:ovnkube-db.ovn-kubernetes.svc.cluster.local:6642"
+  SKYDIVE_LOGGING_LEVEL: "DEBUG"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -73,6 +75,8 @@ data:
   SKYDIVE_AGENT_TOPOLOGY_PROBES: runc ovsdb socketinfo netlink docker
   SKYDIVE_AGENT_LISTEN: 127.0.0.1:8081
   SKYDIVE_OVS_OFLOW_ENABLE: "true"
+  SKYDIVE_OVS_OFLOW_NATIVE: "true"
+  SKYDIVE_LOGGING_LEVEL: "DEBUG"
 ---
 apiVersion: apps/v1
 kind: Deployment
