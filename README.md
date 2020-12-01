@@ -73,6 +73,9 @@ See 'skynet --help' for more information
 
 ### Create the lab
 
+    export SKYDIVE_REV=rfe/ovn-sb
+    export SKYDIVE_REPO=https://github.com/amorenoz/skydive.git
+
     ./scripts/skylab create
 
 Note it will ask you for your sudo password for some operations (opening a port in firewalld)
