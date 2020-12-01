@@ -32,18 +32,18 @@ def list(obj: SkyNetCtxt) -> None:
               help='A short description of his capture',
               required=False)
 @click.option('--name', help='The name of this capture', required=False)
-@click.argument('interface', required=True)
+@click.argument('port', required=True)
 @click.pass_obj
 def create(obj: SkyNetCtxt, bpf: str, description: str, name: str,
-           interface: str) -> None:
+           port: str) -> None:
     """
     Create a new capture
 
     \b
-    INTERFACE is the name of the OvS interface to capture from
+    PORT is the name of the OvS Port to capture from
     """
     prov = CaptureProvider(obj)
-    print(prov.create(bpf, name, description, interface).data())
+    print(prov.create(bpf, name, description, port).data())
 
 
 @capturecli.command()

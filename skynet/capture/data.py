@@ -82,11 +82,11 @@ class CaptureProvider(SkyDiveDataProvider):
         return CaptureData(cap_data)
 
     def create(self, bpf: str, name: str, description: str,
-               interface: str) -> CaptureData:
+               port: str) -> CaptureData:
         """
         Create a capture
         """
-        gremlin = "G.V().Has('Name', '{}')".format(interface)
+        gremlin = "G.V().Has('Type', 'ovsport', 'Name', '{}')".format(port)
         cap_data = self._ctxt.rest_cli().capture_create(
             query=gremlin, name=name, description=description, bpf_filter=bpf)
 
