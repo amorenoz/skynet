@@ -8,6 +8,7 @@ from skynet.node.cli import nodecli
 from skynet.summary import summary
 from skynet.host.cli import hostcli
 from skynet.k8s.cli import k8scli
+from skynet.capture.cli import capturecli
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
@@ -47,3 +48,4 @@ maincli.add_command(nodecli)
 maincli.add_command(hostcli)
 maincli.add_command(summary)
 maincli.add_command(k8scli)
+maincli.add_command(capturecli)
