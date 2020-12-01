@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+
+import skynet.main
+
+if __name__ == '__main__':
+    skynet.main.main()
