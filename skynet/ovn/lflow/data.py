@@ -16,7 +16,7 @@ class LFlowData(SkyDiveData):
         Metadata('OVN.ExtID.stage-name', None, 'Stage'),
         Metadata('OVN.ExtID.source', None, 'Source'),
         Metadata('OVN.LogicalDataPath', lambda x: x[0:8]
-                 if len(x) > 0 else None, 'Datapath'),
+                 if x and len(x) > 0 else None, 'Datapath'),
     ]
     """
     LFlowData represents Logical Flow Data

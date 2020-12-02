@@ -21,7 +21,7 @@ def summary(obj: SkyNetCtxt) -> None:
         if conf.is_empty():
             print('Unknown')
         else:
-            print(conf.data().iloc[0].to_string())
+            print(conf.data()[['MTU', 'NetCIDR', 'SvcCIDR']].iloc[0].to_string())
 
     hprov = HostDataProvider(obj)
     hosts = hprov.list()

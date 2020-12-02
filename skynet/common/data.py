@@ -7,6 +7,7 @@ from skynet.context import SkyNetCtxt
 MetadataList = List[Dict[str, Callable]]
 RawData = List[Dict[str, Any]]
 
+
 class Field:
     """
     A Field defines a field that needs to be extracted from the Skydive data.
@@ -44,6 +45,7 @@ class Field:
         """
         return self.key_name
 
+
 class Metadata(Field):
     """
     A Metadata Field that extracts the values from the Metadata sub object
@@ -60,6 +62,7 @@ class Metadata(Field):
         Extract the Metadata Value from the given data dictionary
         """
         return super().value(data.get('Metadata'))
+
 
 class SkyDiveData:
     """
