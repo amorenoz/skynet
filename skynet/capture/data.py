@@ -81,14 +81,26 @@ class CaptureProvider(SkyDiveDataProvider):
         cap_data = self._ctxt.rest_cli().capture_list()
         return CaptureData(cap_data)
 
-    def create(self, bpf: str, name: str, description: str,
-               port: str) -> CaptureData:
+    def create(self, bpf: str, name: str, description: str, node_type: str,
+               node_name: str) -> CaptureData:
         """
         Create a capture
         """
-        gremlin = "G.V().Has('Type', 'ovsport', 'Name', '{}')".format(port)
+        gremlin = "V().Has('Type', '{}', 'Name', '{}')".format(node_type, node_name)
+        count = self._run_query(gremlin + ".Count()")
+        if count == 0:
+            raise Exception(
+                "There is no port or interface of type {} and name {}".format(
+                    node_type, node_name))
+
+        gremlin = "G." + gremlin
+
         cap_data = self._ctxt.rest_cli().capture_create(
-            query=gremlin, name=name, description=description, bpf_filter=bpf)
+            query=gremlin,
+            name=name,
+            description=description,
+            bpf_filter=bpf,
+            polling_interval=5)
 
         return CaptureData([cap_data])
 

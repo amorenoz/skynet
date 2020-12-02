@@ -32,18 +32,20 @@ def list(obj: SkyNetCtxt) -> None:
               help='A short description of his capture',
               required=False)
 @click.option('--name', help='The name of this capture', required=False)
-@click.argument('port', required=True)
+@click.option('--type', 'port_type', help='The type of port or interface to add the capture from'
+              'Supported: [ovsport(default), veth, internal]', default='ovsport', required=False)
+@click.argument('port_name', required=True)
 @click.pass_obj
 def create(obj: SkyNetCtxt, bpf: str, description: str, name: str,
-           port: str) -> None:
+           port_type: str, port_name: str) -> None:
     """
     Create a new capture
 
     \b
-    PORT is the name of the OvS Port to capture from
+    PORT_NAME is the name of the OvS Port or interface to capture from
     """
     prov = CaptureProvider(obj)
-    print(prov.create(bpf, name, description, port).data())
+    print(prov.create(bpf, name, description, port_type, port_name).data())
 
 
 @capturecli.command()
@@ -56,10 +58,27 @@ def get(obj: SkyNetCtxt, capture: str) -> None:
     \b
     CAPTURE is the ID of the capture
     """
+    show_cols= ['LayersPath',
+                'LinkProtocol',
+                'LinkSrc',
+                'LinkDst',
+                'NetworkProtocol',
+                'NetworkSrc',
+                'NetworkDst',
+                'TransportProtocol',
+                'TransportSrc',
+                'TransportDst',
+                'Packets',
+                'Bytes',
+                'ReturnPackets',
+                'ReturnBytes',
+                'Application',
+               ]
+
     prov = CaptureProvider(obj)
     flows = prov.get(capture)
     if not flows.is_empty():
-        print(flows.data().to_string())
+        print(flows.data().to_string(columns=show_cols))
 
 
 @capturecli.command()
