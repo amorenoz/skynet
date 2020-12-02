@@ -7,28 +7,26 @@ from skynet.context import SkyNetCtxt
 MetadataList = List[Dict[str, Callable]]
 RawData = List[Dict[str, Any]]
 
-
-class Metadata:
+class Field:
     """
-    A Metadata field defines a metadata field that needs to be extracted from the Skydive data
+    A Field defines a field that needs to be extracted from the Skydive data.
     It has the following values
     name: The name of the Field. Nested fields can be accessed with ".", eg: "L0.L1"
     trans: The transformation callable to apply to the value if any
     key_name: The name of the key in the resulting field
     """
-    def __init__(self,
-                 name: str,
-                 trans: Callable = None,
-                 key_name: str = None):
+    def __init__(self, name: str, trans: Callable = None, key_name: str = ""):
         self.name = name
         self.key_name = key_name if key_name else name
         self.trans = trans
 
     def value(self, data: Dict[str, Any]) -> Any:
         """
-        Extract the Metadata Value from the given data dictionary
+        Extract the Value from the given data dictionary
+        Args:
+            data: The data dictoronary where the data shall be extracted from
         """
-        value = data.get('Metadata')
+        value = data
         for key in self.name.split('.'):
             if not value:
                 logging.getLogger("Data").debug(
@@ -41,8 +39,27 @@ class Metadata:
         return self.trans(value) if self.trans else value
 
     def key(self):
+        """
+        Get the key of the field
+        """
         return self.key_name
 
+class Metadata(Field):
+    """
+    A Metadata Field that extracts the values from the Metadata sub object
+    """
+    def __init__(self,
+                 name: str,
+                 trans: Callable = None,
+                 key_name: str = None):
+
+        super(Metadata, self).__init__(name, trans, key_name)
+
+    def value(self, data: Dict[str, Any]) -> Any:
+        """
+        Extract the Metadata Value from the given data dictionary
+        """
+        return super().value(data.get('Metadata'))
 
 class SkyDiveData:
     """
