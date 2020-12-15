@@ -4,8 +4,8 @@ Fast DataPath visualization in Skydive
 
 
 ## Supported platforms
-- KIND (development)
-- ...
+- [KIND (development)](#kind)
+- [ovn-fake-multinode](#ovn-fake-multinode)
 
 # Install skynet
 
@@ -55,9 +55,10 @@ Once skydive has been deployed, skynet cli utility can be used
 See 'skynet --help' for more information
 
 
-# Auxiliary tools
-## skylab
-**skylab** is a cli tool to start a skydive demo lab with ovn-k8s
+
+## Supported Platforms
+### KIND
+To run the tool on a development-oriented KIND setup, a script called `skylab` is provided
 
 ### Requirements
 - Only tested on Fedora (TODO: versions)
@@ -69,7 +70,6 @@ See 'skynet --help' for more information
 
       sed -i /etc/firewalld/firewalld.conf 's/FirewallBackend=.*/FirewallBackend=iptables/'
       systemctl restart firewalld
-
 
 ### Create the lab
 
@@ -112,4 +112,25 @@ Build and redeploy skydive with the current working-dir changes
 ### Clean the lab
 
     ./scripts/skylab up
+
+## ovn-fake-multinode
+If you're using [ovn-fake-multinode](https://github.com/ovn-org/ovn-fake-multinode) to test OVN/OVS, first build skydive
+
+    ./scripts/build-skydive
+
+Then, install skydive into your multinode fake cluster using the convenience script:
+
+    sudo ./scripts/install-fake-multinode install fdp-skydive/skydive
+    Skydive successfully installed in ovn-fake-multinode
+    Skydive API is available at 170.168.0.2:8082
+    You can access the skydive's API by running your commands inside the 'ovnfake-int' namespace                                                                                                                         
+
+This script will create a network namespace called `ovnfake-int` that has access to skydive's API:
+
+    sudo --preserve-env=PWD ip netns exec ovnfake-int su -- $(whoami)
+
+Download the requirements (if you haven't already) and run the tool:
+
+    python -m venv venv; source venv/bin/activate; pip install -r requirements.txt; export PYTHONPATH=$PWD
+    ./bin/skynet --skydive 170.168.0.2:8082 summary
 
