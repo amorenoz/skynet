@@ -1,0 +1,85 @@
+#!/bin/bash
+
+SCRIPT=`realpath -s $0`
+SCRIPTPATH=`dirname ${SCRIPT}`
+. ${SCRIPTPATH}/common
+
+usage(){
+    echo "Usage: $0 [options] command [command options]"
+    echo ""
+    echo "commands:"
+    echo "  start:          Start skydive"
+    echo "  stop:           Stop skydive"
+    echo "  restart:        Restart skydive"
+    echo "  forward:        Foward the UI ports (needed for Skydive UI and Kibana dashboard)"
+    echo ""
+    echo "general options:"
+    echo "  -h:              Display this help message"
+    echo "  -v:              Be verbose"
+    echo "Env vars:"
+    echo "  SKYDIVE_WORKDIR:          Use the specified path as working directory. Default ${DEFAULT_WORKDIR}"
+}
+
+function do_start {
+    info "Deploying skydive"
+    kubectl apply -f ${DEPLOYMENTS}/skydive.yaml
+}
+
+function do_stop {
+    info "Stopping skydive"
+    kubectl delete -f ${DEPLOYMENTS}/skydive.yaml || true
+}
+
+function do_forward {
+    export KUBECONFIG=$HOME/admin.conf
+    info "Forwaring UI ports. You can access the UI on localhost:8082"
+    info "Feel free to move this process to the background..."
+    kubectl port-forward --namespace skydive service/skydive-analyzer 8082 9200
+}
+
+
+## Main
+while getopts "hv" opt; do
+    case ${opt} in
+        h )
+            usage
+            exit 0
+            ;;
+        v )
+            set -x
+            ;;
+        \? )
+            echo "Invalid option: -$OPTARG" 1>&2
+            exit 1
+            ;;
+    esac
+done
+
+# Get command
+shift $((OPTIND -1))
+CMD=$1
+if [ -z "${CMD}" ]; then
+    usage
+    exit 1
+fi
+shift
+
+case $CMD in
+    start)
+        do_start $@
+        ;;
+    stop)
+        do_stop $@
+        ;;
+    restart)
+        do_start $@
+        do_stop $@
+        ;;
+    forward)
+        do_forward $@
+        ;;
+    *)
+        echo "Invalid command $CMD" 1>&2
+        exit 1
+        ;;
+esac
