@@ -4,8 +4,9 @@ set -e
 # GLOBAL_VARS
 SCRIPT=`realpath -s $0`
 SCRIPTPATH=`dirname $SCRIPT`
-WORKDIR="$PWD/fdp-skydive"
 BUILD_SKYDIVE=1
+DEFAULT_WORKDIR=$PWD/fdp-skydive
+WORKDIR="${WORKDIR:-${DEFAULT_WORKDIR}}"
 SKYDIVE_REV="${SKYDIVE_REV:-master}"
 SKYDIVE_REPO="${SKYDIVE_REPO:-default}"
 SKYDIVE_DOCKER_IMG=skydive:devel
@@ -27,10 +28,10 @@ usage(){
     echo "general options:"
     echo "  -h:              Display this help message"
     echo "  -v:              Be verbose"
-    echo "  -w WORKDIR:      Use the specified path as working directory. Default \$PWD/fdp-skydive/"
     echo "Env vars:"
-    echo "  SKYDIVE_REPO:       if set, checkout SKYDIVE_REF reference from this repo before building skydive"
-    echo "  SKYDIVE_REF:        reference within SKYDIVE_REPO to build"
+    echo "  WORKDIR:          Use the specified path as working directory. Default \$PWD/fdp-skydive/"
+    echo "  SKYDIVE_REPO:     if set, checkout SKYDIVE_REF reference from this repo before building skydive"
+    echo "  SKYDIVE_REF:      reference within SKYDIVE_REPO to build"
 }
 
 error() {
@@ -134,6 +135,7 @@ EOF
 
 build_skydive() {
     pushd $GOPATH/src/github.com/skydive-project/skydive
+        #make build WITH_PROF=true
         make build
         make install
     popd
@@ -211,7 +213,7 @@ do_kibana() {
 }
 
 ## Main
-while getopts "hvw:" opt; do
+while getopts "hv" opt; do
     case ${opt} in
         h )
             usage
@@ -219,9 +221,6 @@ while getopts "hvw:" opt; do
             ;;
         v )
             set -x
-            ;;
-        w )
-            WORKDIR=$(realpath $OPTARG)
             ;;
         \? )
             echo "Invalid option: -$OPTARG" 1>&2
@@ -240,7 +239,10 @@ fi
 shift
 
 # Common initialization
-mkdir -p "$WORKDIR" > /dev/null || true
+if [ ! -d "${WORKDIR}" ]; then
+    info "Workdir ${WORKDIR} does not exist, creating"
+    mkdir ${WORKDIR}
+fi
 export GOPATH=$WORKDIR/go
 
 case $CMD in
