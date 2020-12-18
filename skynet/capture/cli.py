@@ -1,5 +1,4 @@
 import click
-from typing import Dict, List, Any
 
 from skynet.context import SkyNetCtxt
 from skynet.capture.data import CaptureProvider
@@ -11,7 +10,6 @@ def capturecli(obj: SkyNetCtxt) -> None:
     """
     Create and visualize packet captures
     """
-    pass
 
 
 @capturecli.command()
@@ -32,8 +30,12 @@ def list(obj: SkyNetCtxt) -> None:
               help='A short description of his capture',
               required=False)
 @click.option('--name', help='The name of this capture', required=False)
-@click.option('--type', 'port_type', help='The type of port or interface to add the capture from'
-              'Supported: [ovsport(default), veth, internal]', default='ovsport', required=False)
+@click.option('--type',
+              'port_type',
+              help='The type of port or interface to add the capture from'
+              'Supported: [ovsport(default), veth, internal]',
+              default='ovsport',
+              required=False)
 @click.argument('port_name', required=True)
 @click.pass_obj
 def create(obj: SkyNetCtxt, bpf: str, description: str, name: str,
@@ -58,22 +60,23 @@ def get(obj: SkyNetCtxt, capture: str) -> None:
     \b
     CAPTURE is the ID of the capture
     """
-    show_cols= ['LayersPath',
-                'LinkProtocol',
-                'LinkSrc',
-                'LinkDst',
-                'NetworkProtocol',
-                'NetworkSrc',
-                'NetworkDst',
-                'TransportProtocol',
-                'TransportSrc',
-                'TransportDst',
-                'Packets',
-                'Bytes',
-                'ReturnPackets',
-                'ReturnBytes',
-                'Application',
-               ]
+    show_cols = [
+        'LayersPath',
+        'LinkProtocol',
+        'LinkSrc',
+        'LinkDst',
+        'NetworkProtocol',
+        'NetworkSrc',
+        'NetworkDst',
+        'TransportProtocol',
+        'TransportSrc',
+        'TransportDst',
+        'Packets',
+        'Bytes',
+        'ReturnPackets',
+        'ReturnBytes',
+        'Application',
+    ]
 
     prov = CaptureProvider(obj)
     flows = prov.get(capture)

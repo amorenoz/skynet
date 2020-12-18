@@ -10,7 +10,6 @@ def nodecli(obj: SkyNetCtxt) -> None:
     """
     Node commands
     """
-    pass
 
 
 @nodecli.command()

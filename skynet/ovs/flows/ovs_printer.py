@@ -4,7 +4,8 @@ from typing import Dict, List, Any
 
 class OVSFlowPrinter():
     """
-    (Experimental) OVSFlowPrinter is a class that is able to print OFFLowData in the same sytanx used by ovs-ofctl
+    (Experimental) OVSFlowPrinter is a class that is able to print OFFLowData
+    in the same sytanx used by ovs-ofctl
     """
     def __init__(self):
         self.action_printers = {'resubmit': self.resubmit_action_printer}
@@ -29,7 +30,7 @@ class OVSFlowPrinter():
         ct_str = "ct_state="
         for state in filter_obj["Mask"]:
             ct_str += "{sign}{state}".format(
-                sign=("+" if filter_obj["Value"].get(state) == True else "-"),
+                sign=("+" if filter_obj["Value"].get(state) else "-"),
                 state=(self.state_str.get(state) or "UNKNOWN!:%s" % state))
         return ct_str
 
@@ -59,8 +60,6 @@ class OVSFlowPrinter():
              self.dict2str(action_obj.get('Arguments'))])
 
     def printFilter(self, filter_data: List[Dict[str, Any]]):
-        import pdb
-        #pdb.set_trace()
         filter_str = ""
         filter_str = ','.join([
             self.filter_printer(filter_obj["Type"])(filter_obj)

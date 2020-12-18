@@ -1,5 +1,4 @@
 import pandas
-from typing import Dict, List, Any
 from skynet.ovn.lflow.data import LFlowData
 
 
@@ -37,8 +36,8 @@ class OVNFLowPrinter():
                 fstr += "Datapath: ({data}), Pipleine: {pipe}\n".format(
                     data=datapath, pipe=pipeline)
 
-                for _, series in df[(df['Datapath'] == datapath)
-                                    & (df['Pipeline'] == pipeline)].iterrows():
+                data = df[(df['Datapath'] == datapath) & (df['Pipeline'] == pipeline)]
+                for _, series in data.iterrows():
                     fstr += self.fformat(series)
 
         return fstr

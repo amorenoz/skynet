@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Callable, Any, Optional
+from typing import Any, Callable, Dict, List, Optional
 from pandas import DataFrame, Timestamp
 
 from skynet.context import SkyNetCtxt
@@ -12,11 +12,15 @@ class Field:
     """
     A Field defines a field that needs to be extracted from the Skydive data.
     It has the following values
-    name: The name of the Field. Nested fields can be accessed with ".", eg: "L0.L1"
+    name: The name of the Field. Nested fields can be accessed with ".",
+        eg: "L0.L1"
     trans: The transformation callable to apply to the value if any
     key_name: The name of the key in the resulting field
     """
-    def __init__(self, name: str, trans: Callable = None, key_name: str = ""):
+    def __init__(self,
+                 name: str,
+                 trans: Callable = None,
+                 key_name: str = None):
         self.name = name
         self.key_name = key_name if key_name else name
         self.trans = trans
@@ -27,7 +31,7 @@ class Field:
         Args:
             data: The data dictoronary where the data shall be extracted from
         """
-        value = data
+        value: Optional[Dict] = data
         for key in self.name.split('.'):
             if not value:
                 logging.getLogger("Data").debug(
@@ -61,14 +65,19 @@ class Metadata(Field):
         """
         Extract the Metadata Value from the given data dictionary
         """
-        return super().value(data.get('Metadata'))
+        meta_value = data.get('Metadata')
+        if not meta_value:
+            raise Exception('Metadata not found in {}'.format(data))
+
+        return super().value(meta_value)
 
 
 class SkyDiveData:
     """
-    SkyDiveData defines a base class for data encapsulations coming from Skydive
-    It provides basic data manipulation functionality
+    SkyDiveData defines a base class for data encapsulations coming from
+    Skydive. It provides basic data manipulation functionality
     """
+
     BASIC_FIELDS = {
         "ID": None,
         "Host": None,
@@ -76,10 +85,14 @@ class SkyDiveData:
         "UpdatedAt": Timestamp,
         "DeletedAt": Timestamp,
     }
-
+    """
+    BASIC FIELDS is an string to Callable dictionary of basic information
+    fields to extract. They are common to most tables, however a subclass my
+    override this value to specify their own set of basic fields
+    """
     def __init__(self,
                  data: RawData,
-                 meta: List[Metadata],
+                 meta: List[Field],
                  index: str = None) -> None:
         """
         SkyDiveData Constructor
@@ -177,7 +190,8 @@ class SkyDiveDataProvider:
         Run a Skydive Query
         Args:
             query: The query string
-                It must not contain the initial G.At() , that part will be prepended by
+                It must not contain the initial G.At() ,
+                that part will be prepended by
                 this function
         """
 

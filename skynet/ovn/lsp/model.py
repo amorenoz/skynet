@@ -2,6 +2,7 @@ from typing import Dict, List, Any
 
 from skynet.common.data import SkyDiveData, Metadata
 
+
 class LSPData(SkyDiveData):
     METADATA = [
         Metadata('Type'),
@@ -22,4 +23,3 @@ class LSPData(SkyDiveData):
         super(LSPData, self).__init__(data=data,
                                       meta=self.METADATA,
                                       index="UUID")
-
