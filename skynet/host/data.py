@@ -32,7 +32,6 @@ class HostData(SkyDiveData):
                                        index="ID")
 
 
-
 class HostDataProvider(SkyDiveDataProvider):
     """
     Data Provider for Hosts
@@ -48,4 +47,3 @@ class HostDataProvider(SkyDiveDataProvider):
 
         data = self._run_query(query)
         return HostData(data)
-

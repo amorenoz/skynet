@@ -10,7 +10,6 @@ def lrpcli(obj: SkyNetCtxt) -> None:
     """
     Logical Router Ports commands
     """
-    pass
 
 
 @lrpcli.command()

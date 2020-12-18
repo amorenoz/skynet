@@ -19,9 +19,10 @@ class SeriesPrinter():
             indent: The entire string is indented by this level
         """
         out = ""
-        header = "|Name: {n}\n|Type: {t}\n|ID: {i}\n".format(t=series.get('Type') or "_",
-                                                             n=series.get('Name') or "_",
-                                                             i=series.name)
+        header = "|Name: {n}\n|Type: {t}\n|ID: {i}\n".format(
+            t=series.get('Type') or "_",
+            n=series.get('Name') or "_",
+            i=series.name)
         out += header
 
         tabmin = self._tabmin(series)
@@ -31,14 +32,14 @@ class SeriesPrinter():
             value = pprint.pformat(series.get(index))
             if value.find('\n') > 0:
                 format_value = "\n" + textwrap.indent(
-                    value, self.INDENT_STR  * (len(index) + 4 + tablen))
+                    value, self.INDENT_STR * (len(index) + 4 + tablen))
             else:
                 format_value = value
             out += " - {index}:{tab}{value}\n".format(index=index,
                                                       tab=(self.INDENT_STR * tablen),
                                                       value=format_value)
 
-        return textwrap.indent(out, self.INDENT_STR  * indent)
+        return textwrap.indent(out, self.INDENT_STR * indent)
 
     @classmethod
     def _tabmin(cls, series: Series) -> int:

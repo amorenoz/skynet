@@ -10,7 +10,6 @@ def aclcli(obj: SkyNetCtxt) -> None:
     """
     ACLs commands
     """
-    pass
 
 
 @aclcli.command()

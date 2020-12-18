@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List
 
 from skynet.context import SkyNetCtxt
 from skynet.common.data import SkyDiveDataProvider, SkyDiveData, Metadata, SkyDiveFilter, SkyDiveDataFilter
@@ -159,6 +159,5 @@ class K8sProvider(SkyDiveDataProvider):
             veth_data = self._run_query(veth_query)
         else:
             veth_data = []
-
 
         return Pod(pod_data, container_data, lsp_data, veth_data)

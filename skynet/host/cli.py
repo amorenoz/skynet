@@ -1,6 +1,4 @@
 import click
-import sys
-from typing import Dict, List, Any
 
 from skynet.context import SkyNetCtxt
 from skynet.host.data import HostDataProvider
@@ -12,7 +10,6 @@ def hostcli(obj: SkyNetCtxt) -> None:
     """
     Host commands
     """
-    pass
 
 
 @hostcli.command()
@@ -21,6 +18,6 @@ def list(obj: SkyNetCtxt) -> None:
     """
     List the hosts
     """
-    print(HostDataProvider(obj).list().to_string(
-    columns=['Hostname', 'Platform']))
-
+    print(
+        HostDataProvider(obj).list().to_string(
+            columns=['Hostname', 'Platform']))

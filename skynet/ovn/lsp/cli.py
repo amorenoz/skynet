@@ -11,7 +11,6 @@ def lspcli(obj: SkyNetCtxt) -> None:
     """
     Logical Switch Ports commands
     """
-    pass
 
 
 @lspcli.command()
@@ -29,6 +28,7 @@ def list(obj: SkyNetCtxt, switch: str) -> None:
     print(
         LSPProvider(obj).list(switch).to_string(
             ["Name", 'PortType', 'Addresses', 'Options']))
+
 
 @lspcli.command()
 @click.argument('uid', required=True)
@@ -62,4 +62,3 @@ def get(obj: SkyNetCtxt, uid: str) -> None:
     if not lsp.lrp.is_empty():
         print('Logical Router Port:')
         print(sprint.print(lsp.lrp.data().iloc[0], 4))
-

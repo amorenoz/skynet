@@ -24,7 +24,9 @@ class OFFLowData(SkyDiveData):
                                          meta=self.METADATA,
                                          index="ID")
         if not self.is_empty():
-            self._data.sort_values(by=['Table', 'Priority'], ascending=[True, False], inplace=True)
+            self._data.sort_values(by=['Table', 'Priority'],
+                                   ascending=[True, False],
+                                   inplace=True)
 
     def to_text(self):
         """
@@ -108,7 +110,10 @@ class OFFlowProvider(SkyDiveDataProvider):
         """
         super(OFFlowProvider, self).__init__(ctxt=ctxt)
 
-    def list(self, host: str = "", bridge: str = "", filter_obj: OFFlowFilter = None) -> OFFLowData:
+    def list(self,
+             host: str = "",
+             bridge: str = "",
+             filter_obj: OFFlowFilter = None) -> OFFLowData:
         """
         Get the Openflow Flows based on a filter
         """
@@ -116,10 +121,12 @@ class OFFlowProvider(SkyDiveDataProvider):
         gremlin_filter = filter_obj.generate_gremlin() if filter_obj else ""
 
         if host:
-            query += ".Has('Type', 'host').HasEither('ID', '{host}', 'Name', '{host}').Out()".format(host=host)
+            query += ".Has('Type', 'host').HasEither('ID', '{host}', 'Name', '{host}').Out()".format(
+                host=host)
 
         if bridge:
-            query += ".Has('Type', 'ovsbridge').HasEither('ID', '{bridge}', 'Name', '{bridge}').Out()".format(bridge=bridge)
+            query += ".Has('Type', 'ovsbridge').HasEither('ID', '{bridge}', 'Name', '{bridge}').Out()".format(
+                bridge=bridge)
         elif host:
             query += ".Out()"
 

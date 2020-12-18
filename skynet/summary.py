@@ -2,7 +2,6 @@ import click
 import textwrap
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveDataProvider
 from skynet.host.data import HostDataProvider
 from skynet.platform import Platform, PlatformProvider
 from skynet.ovs.bridge.data import OvSDataProvider
@@ -21,7 +20,8 @@ def summary(obj: SkyNetCtxt) -> None:
         if conf.is_empty():
             print('Unknown')
         else:
-            print(conf.data()[['MTU', 'NetCIDR', 'SvcCIDR']].iloc[0].to_string())
+            print(conf.data()[['MTU', 'NetCIDR',
+                               'SvcCIDR']].iloc[0].to_string())
 
     hprov = HostDataProvider(obj)
     hosts = hprov.list()

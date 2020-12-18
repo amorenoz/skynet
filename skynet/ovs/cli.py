@@ -1,10 +1,9 @@
 import click
-import sys
-from typing import Dict, List, Any
 
 from skynet.context import SkyNetCtxt
-from skynet.ovs.flows.data import OFFLowData, OFFlowProvider, OFFlowFilter
+from skynet.ovs.flows.data import OFFlowFilter, OFFlowProvider
 from skynet.ovs.bridge.cli import bridgecli
+import IPython
 
 
 @click.group(name='ovs')
@@ -13,7 +12,6 @@ def ovscli(obj: SkyNetCtxt) -> None:
     """
     OVS command
     """
-    pass
 
 
 @click.group(name='flows')
@@ -22,7 +20,6 @@ def flowscli(obj: SkyNetCtxt) -> None:
     """
     OVS flows commands
     """
-    pass
 
 
 @flowscli.command()
@@ -86,9 +83,7 @@ def list(obj: SkyNetCtxt,
         print(flows.to_ovs())
 
     if interactive:
-        import IPython
-        IPython.embed(display_banner=
-                      'Access the Dataframe with the flows in "flows.data()"')
+        IPython.embed()
 
 
 ovscli.add_command(flowscli)

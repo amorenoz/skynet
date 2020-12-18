@@ -10,7 +10,6 @@ def datapathcli(obj: SkyNetCtxt) -> None:
     """
     Datapath Binding commands
     """
-    pass
 
 
 @datapathcli.command()

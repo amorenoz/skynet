@@ -1,5 +1,4 @@
 import click
-import textwrap
 
 from skynet.common.printers import SeriesPrinter
 from skynet.context import SkyNetCtxt
@@ -12,7 +11,6 @@ def k8scli(obj: SkyNetCtxt) -> None:
     """
     Kubernetes Commands
     """
-    pass
 
 
 @click.group(name='pod')
@@ -21,7 +19,6 @@ def podcli(obj: SkyNetCtxt) -> None:
     """
     Pod Commands
     """
-    pass
 
 
 @podcli.command(name='list')
@@ -44,6 +41,7 @@ def listpods(obj: SkyNetCtxt, filter: str) -> None:
             'Namespace', 'Name', 'Status', 'Node', 'IP', 'HostNetwork',
             'HostIP'
         ]))
+
 
 @podcli.command(name='get')
 @click.argument('uid', required=True)
@@ -80,13 +78,13 @@ def getpod(obj: SkyNetCtxt, uid: str) -> None:
     else:
         print(sprint.print(pod.iface.data().iloc[0], 4))
 
+
 @click.group(name='container')
 @click.pass_obj
 def containercli(obj: SkyNetCtxt) -> None:
     """
     Container Commands
     """
-    pass
 
 
 @containercli.command(name='list')

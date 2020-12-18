@@ -1,6 +1,5 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Callable, Optional
 from skydive.captures import Capture
-from pandas import DataFrame
 
 from skynet.context import SkyNetCtxt
 from skynet.common.data import SkyDiveData, Field, SkyDiveDataProvider
@@ -10,7 +9,10 @@ class CaptureData(SkyDiveData):
     """
     CaptureData represets a capture in Skydive's Database
     """
-    BASIC_FIELDS = {}
+    BASIC_FIELDS: Dict[str, Optional[Callable]] = {}
+    """
+    Override BASIC_FIELDS as this is a special data
+    """
     METADATA = [
         Field('UUID'),
         Field('GremlinQuery'),
@@ -32,7 +34,10 @@ class FlowData(SkyDiveData):
     """
     Flow Data represents a Flow list in skydive database
     """
-    BASIC_FIELDS = {}
+    BASIC_FIELDS: Dict[str, Optional[Callable]] = {}
+    """
+    Override BASIC_FIELDS as this is a special data
+    """
     METADATA = [
         Field('UUID'),
         Field('LayersPath'),
@@ -77,7 +82,6 @@ class CaptureProvider(SkyDiveDataProvider):
         """
         List active captures
         """
-        captures = []
         cap_data = self._ctxt.rest_cli().capture_list()
         return CaptureData(cap_data)
 
@@ -86,7 +90,8 @@ class CaptureProvider(SkyDiveDataProvider):
         """
         Create a capture
         """
-        gremlin = "V().Has('Type', '{}', 'Name', '{}')".format(node_type, node_name)
+        gremlin = "V().Has('Type', '{}', 'Name', '{}')".format(
+            node_type, node_name)
         count = self._run_query(gremlin + ".Count()")
         if count == 0:
             raise Exception(

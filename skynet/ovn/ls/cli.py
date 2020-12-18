@@ -10,7 +10,6 @@ def lscli(obj: SkyNetCtxt) -> None:
     """
     Logical Switch commands
     """
-    pass
 
 
 @lscli.command()

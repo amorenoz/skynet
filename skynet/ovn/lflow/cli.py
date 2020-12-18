@@ -12,7 +12,6 @@ def lflowcli(obj: SkyNetCtxt) -> None:
     """
     Logical Flow commands
     """
-    pass
 
 
 @lflowcli.command()
@@ -43,11 +42,13 @@ def list(obj: SkyNetCtxt, filter: str = "", format: str = "table") -> None:
     filter_obj = LFlowFilter()
     filter_obj.process_string(filter)
     flow_data = LFlowProvider(obj).list(filter_obj)
+    colunns_to_print = [
+        'Match', 'Actions', 'Pipeline', 'Priority', 'Table', 'Datapath'
+    ]
+
     if not flow_data.is_empty():
         if not format or format == "table":
-            print(flow_data.data().to_string(columns=[
-                'Match', 'Actions', 'Pipeline', 'Priority', 'Table', 'Datapath'
-            ],
+            print(flow_data.data().to_string(columns=colunns_to_print,
                                              justify="left",
                                              max_colwidth=60))
         elif format == "text":

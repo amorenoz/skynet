@@ -9,7 +9,7 @@ class SkyNetCtxt():
         TODO: Accept configuration
         """
         self._rest = RESTClient("localhost:8082")
-        self._options = {}
+        self._options: Dict[str, Any] = {}
 
     def rest_cli(self) -> RESTClient:
         """

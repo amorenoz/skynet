@@ -11,7 +11,6 @@ def bridgecli(obj: SkyNetCtxt) -> None:
     """
     OvS Bridge commands
     """
-    pass
 
 
 @bridgecli.command()
