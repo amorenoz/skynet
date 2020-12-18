@@ -1,14 +1,15 @@
 from typing import Any, Dict, List
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveDataProvider, SkyDiveData, Metadata
+from skynet.common.data import SkyDiveDataProvider, SkyDiveData, \
+    Metadata, Field
 
 
 class OvSBridgeData(SkyDiveData):
     """
     OvsBridgeData represents OvS bridge
     """
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('Name'),
         Metadata('ExtID.bridge-id', None, 'BridgeID'),
@@ -29,7 +30,7 @@ class OvSSystemData(SkyDiveData):
     """
     OvSSystemData represents OvS System Configuration
     """
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('ExtID.hostname', None, 'Host'),
         Metadata('ExtID.ovn-encap-type', None, 'EncapType'),
@@ -50,7 +51,7 @@ class OvSPortData(SkyDiveData):
     """
     OvsPortData represents OvS ports data from Skydive
     """
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('Name'),
         Metadata('ExtID'),
@@ -70,7 +71,7 @@ class OvSIfaceData(SkyDiveData):
     """
     OvSIfaceData represets OvS Interfaces
     """
-    COMMON_METADATA = [
+    COMMON_METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('Name'),
         Metadata('ExtID'),
@@ -78,11 +79,11 @@ class OvSIfaceData(SkyDiveData):
         Metadata('Ovs'),
         Metadata('OfPort'),
     ]
-    PATCH_METADATA = [
+    PATCH_METADATA: List[Field] = [
         Metadata('Ovs.Options.peer', None, "Peer"),
         Metadata('ExtID.ovn-local-port', None, 'LocalPort'),
     ]
-    GENEVE_METADATA = [
+    GENEVE_METADATA: List[Field] = [
         Metadata('RemoteIP'),
         Metadata('IfIndex'),
         Metadata('MTU'),
@@ -91,7 +92,7 @@ class OvSIfaceData(SkyDiveData):
         Metadata('TunEgressIface'),
         Metadata('Ovs.Options', None, 'Options'),
     ]
-    INTERNAL_METADATA = [
+    INTERNAL_METADATA: List[Field] = [
         Metadata('Neighbours'),
         Metadata('EncapType'),
         Metadata('IPV4'),
@@ -103,7 +104,7 @@ class OvSIfaceData(SkyDiveData):
         Metadata('LinkFlags'),
         Metadata('Features'),
     ]
-    VETH_METADATA = [
+    VETH_METADATA: List[Field] = [
         Metadata('PeerIFIndex'),
         Metadata('Features'),
         Metadata('State'),

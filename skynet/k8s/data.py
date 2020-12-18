@@ -1,7 +1,8 @@
 from typing import Any, Dict, List
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveDataProvider, SkyDiveData, Metadata, SkyDiveFilter, SkyDiveDataFilter
+from skynet.common.data import SkyDiveDataProvider, SkyDiveData, Metadata, \
+    SkyDiveFilter, SkyDiveDataFilter, Field
 from skynet.ovn.lsp.model import LSPData
 from skynet.ovs.bridge.data import OvSIfaceData
 
@@ -10,7 +11,7 @@ class PodData(SkyDiveData):
     """
     Pod Data from Skydive
     """
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('Name'),
         Metadata('K8s.Namespace', None, 'Namespace'),
@@ -31,7 +32,7 @@ class ContainerData(SkyDiveData):
     """
     Container Data from Skydive
     """
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('Name'),
         Metadata('K8s.Namespace', None, 'Namespace'),

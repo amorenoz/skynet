@@ -1,11 +1,12 @@
 from typing import Dict, List, Any
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
+from skynet.common.data import SkyDiveData, Field, Metadata, \
+    SkyDiveDataProvider
 
 
 class LRData(SkyDiveData):
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('Name'),
         Metadata('UUID'),

@@ -1,10 +1,10 @@
 from typing import Dict, List, Any
 
-from skynet.common.data import SkyDiveData, Metadata
+from skynet.common.data import SkyDiveData, Metadata, Field
 
 
 class LSPData(SkyDiveData):
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('Name'),
         Metadata('UUID'),

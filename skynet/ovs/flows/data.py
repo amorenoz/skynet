@@ -2,13 +2,15 @@ from typing import Dict, List, Any
 from functools import partial
 import pprint
 
-from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider, SkyDiveFilter, SkyDiveDataFilter, SkyDivePostFilter
+from skynet.common.data import SkyDiveData, Metadata, Field, \
+    SkyDiveDataProvider, SkyDiveFilter, SkyDiveDataFilter, \
+    SkyDivePostFilter
 from skynet.context import SkyNetCtxt
 from skynet.ovs.flows.ovs_printer import OVSFlowPrinter
 
 
 class OFFLowData(SkyDiveData):
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('Name'),
         Metadata('Cookie'),
