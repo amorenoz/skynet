@@ -1,14 +1,14 @@
 from typing import Dict, Any, List
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveDataProvider, SkyDiveData, Metadata
+from skynet.common.data import SkyDiveDataProvider, SkyDiveData, Metadata, Field
 
 
 class HostData(SkyDiveData):
     """
     HostData represents a Host data in Skydive
     """
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('Hostname'),
         Metadata('VirtualizationSystem'),

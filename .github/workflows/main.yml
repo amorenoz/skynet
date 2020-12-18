@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.5', '3.6', '3.7', '3.8']
+        python-version: ['3.6', '3.7', '3.8']
 
     steps:
     - uses: actions/checkout@v2
@@ -27,10 +27,13 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
-        # Run gating flake8. Make exception on line length
-        flake8 skynet --count  --max-complexity=10 --max-line-length=100 --ignore=E501
+        # Run gating flake8.
+        # Exceptions
+        # E501: Line length there are some queries that require longer length
+        # W504, W503: Allow break after operators
+        flake8 skynet --count  --max-complexity=10 --max-line-length=100 --ignore=E501,W504,W503
         # Run flake8. Print everything but to show warnings
         flake8 skynet --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
     - name: Test with mypy
       run: |
-        mypy
+        mypy skynet bin/skynet

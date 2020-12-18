@@ -38,7 +38,7 @@ class FlowData(SkyDiveData):
     """
     Override BASIC_FIELDS as this is a special data
     """
-    METADATA = [
+    METADATA: List[Field] = [
         Field('UUID'),
         Field('LayersPath'),
         Field('Application'),

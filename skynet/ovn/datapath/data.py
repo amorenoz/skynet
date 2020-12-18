@@ -1,11 +1,12 @@
 from typing import Dict, List, Any
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider, SkyDiveFilter, SkyDiveDataFilter
+from skynet.common.data import SkyDiveData, Field, Metadata, \
+    SkyDiveDataProvider, SkyDiveFilter, SkyDiveDataFilter
 
 
 class DatapathData(SkyDiveData):
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('Type'),
         Metadata('Name'),
         Metadata('OVN.TunnelKey', None, 'TunnelKey'),

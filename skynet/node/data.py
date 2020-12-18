@@ -1,14 +1,15 @@
 from typing import Dict, List, Any
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveData, Metadata, SkyDiveDataProvider
+from skynet.common.data import SkyDiveData, Metadata, Field, \
+    SkyDiveDataProvider
 
 
 class NodeData(SkyDiveData):
     """
     NodeData represents Logical Switch Data
     """
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('UUID'),
         Metadata('Type'),
         Metadata('K8s.Extra.ObjectMeta.Annotations.k8s.ovn'),

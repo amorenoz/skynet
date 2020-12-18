@@ -3,7 +3,8 @@ import logging
 from typing import Dict, Any, List
 
 from skynet.context import SkyNetCtxt
-from skynet.common.data import SkyDiveDataProvider, SkyDiveData, Metadata
+from skynet.common.data import SkyDiveDataProvider, Metadata, Field, \
+    SkyDiveData
 
 
 class Platform(Enum):
@@ -18,7 +19,7 @@ class K8sConfig(SkyDiveData):
     """
     K8s Configuration
     """
-    METADATA = [
+    METADATA: List[Field] = [
         Metadata('K8s.Extra.Data.mtu', int, 'MTU'),
         Metadata('K8s.Extra.Data.net_cidr', None, 'NetCIDR'),
         Metadata('K8s.Extra.Data.svc_cidr', None, 'SvcCIDR'),

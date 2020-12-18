@@ -36,7 +36,8 @@ class OVNFLowPrinter():
                 fstr += "Datapath: ({data}), Pipleine: {pipe}\n".format(
                     data=datapath, pipe=pipeline)
 
-                data = df[(df['Datapath'] == datapath) & (df['Pipeline'] == pipeline)]
+                data = df[(df['Datapath'] == datapath)
+                          & (df['Pipeline'] == pipeline)]
                 for _, series in data.iterrows():
                     fstr += self.fformat(series)
 

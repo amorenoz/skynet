@@ -36,7 +36,8 @@ class SeriesPrinter():
             else:
                 format_value = value
             out += " - {index}:{tab}{value}\n".format(index=index,
-                                                      tab=(self.INDENT_STR * tablen),
+                                                      tab=(self.INDENT_STR *
+                                                           tablen),
                                                       value=format_value)
 
         return textwrap.indent(out, self.INDENT_STR * indent)
