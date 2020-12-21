@@ -1,0 +1,117 @@
+#!/bin/bash
+
+set -euf
+
+SCRIPT=`realpath -s $0`
+ROOTDIR="$(dirname ${SCRIPT})/../"
+DEFAULT_WORKDIR=$PWD/fdp-skydive
+WORKDIR="${WORKDIR:-${DEFAULT_WORKDIR}}"
+RUNC_CMD="${RUNC_CMD:-docker}"
+
+CENTRAL_NAME="ovn-central"
+CHASSIS_PREFIX="${CHASSIS_PREFIX:-ovn-chassis-}"
+GW_PREFIX="ovn-gw-"
+
+function usage() {
+    echo "$0 [uninstall | install SKYDIVE_BINARY]"
+    exit 1
+}
+# Get the IP address from eth1
+function get_ip() {
+    local container=$1
+    ${RUNC_CMD} exec -it ${container} ip -4 -o addr show eth1 | awk '{print $4}' | cut -d "/" -f 1
+}
+
+function copy_to_all() {
+    local local_file=$1
+    local dest_file=$2
+
+    for container in $(all_containers); do
+        ${RUNC_CMD} cp ${local_file} ${container}:${dest_file}
+    done
+}
+
+function list_containers() {
+    local prefix=$1
+    ${RUNC_CMD} ps -qa --filter "name=${prefix}"
+}
+
+function all_containers() {
+    local containers=""
+    for cont_type in ${CENTRAL_NAME} ${CHASSIS_PREFIX} ${GW_PREFIX}; do
+        containers="${containers} $(list_containers ${cont_type})"
+    done
+    echo ${containers}
+}
+
+function run_skydive() {
+    local subcommand=$1
+    local container=$2
+    shift
+    shift
+    local env=${@:-}
+    local default_env="SKYDIVE_LOGGING_FILE_PATH=/tmp/skydive-${subcommand}.log SKYDIVE_LOGGING_BACKENDS=file"
+
+    ${RUNC_CMD} exec -it ${container} nohup sh -c "${default_env} ${env} skydive ${subcommand} --verbose 2>&1 > /tmp/skydive-${subcommand}.out &" </dev/null &>/dev/null
+}
+
+function add-int-namespace() {
+    # Might already been done by ovn-fake-multinode
+    ip netns pids ovnfake-int 2>/dev/null || (
+    	ip netns delete ovnfake-int || true
+    	ip netns add ovnfake-int
+    	ovs-vsctl add-port br-ovn ovnfake-int -- set interface ovnfake-int type=internal
+    	ip link set ovnfake-int netns ovnfake-int
+    	ip netns exec ovnfake-int ip link set lo up
+    	ip netns exec ovnfake-int ip link set ovnfake-int address 30:54:00:00:00:60
+    	ip netns exec ovnfake-int ip addr add 170.168.0.253/24 dev ovnfake-int
+    	ip netns exec ovnfake-int ip addr add 3000::e/64 dev ovnfake-int
+    	ip netns exec ovnfake-int ip link set ovnfake-int up
+    )
+}
+
+function install() {
+    local central_container=$(list_containers ${CENTRAL_NAME})
+    local central_ip=$(get_ip ${central_container})
+
+    copy_to_all ${SKYDIVE_PATH} /usr/local/bin/skydive
+    copy_to_all ${ROOTDIR}/config/ovn-fake-multinode/skydive.yml /etc/skydive/skydive.yml
+
+    run_skydive analyzer ${central_container}
+
+    for container in $(all_containers); do
+        run_skydive agent ${container} "SKYDIVE_ANALYZERS=${central_ip}:8082"
+    done
+    add-int-namespace
+
+    echo "Skydive successfully installed in ovn-fake-multinode"
+    echo "Skydive API is available at ${central_ip}:8082"
+    echo "You can access the skydive's API by running your commands inside the 'ovnfake-int' namespace"
+}
+
+function uninstall() {
+    for container in $(all_containers); do
+        ${RUNC_CMD} exec -it $container killall skydive || true
+    done
+    ip netns delete ovnfake-int || true
+    ovs-vsctl --if-exists del-port br-ovn ovnfake-int
+}
+
+[ "$#" -ge 1 ] || usage
+
+case $1 in
+    install)
+        [ "$#" -eq 2 ] || usage
+        SKYDIVE_PATH=$2
+        [ -f "${SKYDIVE_PATH}" ] || (echo "${SKYDIVE_PATH} must exist"; exit 1) 
+        install
+        ;;
+    uninstall)
+        uninstall
+        ;;
+    *)
+        echo "Valid commands: install uninstall"
+        exit 1
+        ;;
+esac
+

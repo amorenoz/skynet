@@ -1,3 +1,5 @@
-fdp-skydive/
+workdir
+bin/
 
+*egg-info
 **/__pycache__/

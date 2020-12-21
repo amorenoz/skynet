@@ -3,12 +3,12 @@ from skydive.rest.client import RESTClient
 
 
 class SkyNetCtxt():
-    def __init__(self):
+    def __init__(self, skydive_conn: str = "localhost:8082"):
         """
         SkyNetCtxt constructor
         TODO: Accept configuration
         """
-        self._rest = RESTClient("localhost:8082")
+        self._rest = RESTClient(skydive_conn)
         self._options: Dict[str, Any] = {}
 
     def rest_cli(self) -> RESTClient:

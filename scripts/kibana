@@ -1,0 +1,51 @@
+#!/bin/bash
+
+SCRIPT=`realpath -s $0`
+SCRIPTPATH=`dirname ${SCRIPT}`
+. ${SCRIPTPATH}/common
+
+usage(){
+    echo "Usage: $0 [options] command [command options]"
+    echo " Starts/stops a Kibana container to inspect the ElasticSearch DB directly"
+    echo "commands:"
+    echo "  start:          Start the kibana container"
+    echo "  stop:           Stop the kibana container"
+    echo "  restart:        Restart the kibana container"
+}
+
+do_start() {
+    info "Starting Kibana Container"
+    ${RUNC_CMD} run -d --network="host" --name skydive-kibana --env ELASTICSEARCH_HOSTS="http://localhost:9200" -p 5601:5601 docker.elastic.co/kibana/kibana:7.8.0
+    info "...done. Kibana dashboard should be accessible (in around 30s) at localhost:5601"
+}
+
+do_stop() {
+    docker stop skydive-kibana > /dev/null || true
+    docker rm skydive-kibana > /dev/null || true
+}
+# Get command
+shift $((OPTIND -1))
+CMD=$1
+if [ -z "${CMD}" ]; then
+    usage
+    exit 1
+fi
+shift
+
+
+case $CMD in
+    start)
+        do_start $@
+        ;;
+    stop)
+        do_stop $@
+        ;;
+    restart)
+        do_start $@
+        do_stop $@
+        ;;
+    *)
+        echo "Invalid command $CMD" 1>&2
+        exit 1
+        ;;
+esac

@@ -16,18 +16,27 @@ from skynet.capture.cli import capturecli
     '--at',
     help='Specify a time in the past.'
     'Allowed formats: timestamp, RFC1123, Go Duration Format'
-    'Examples: "-1.5h", "-200ms", "Sun, 06 Nov 2016 08:49:37 GMT", "1479899809"'
+    'Examples: "-1.5h", "-200ms", "Sun, 06 Nov 2016 08:49:37 GMT"'
+    '"1479899809"'
 )
 @click.option('--log',
               '-l',
               help='Set log level [DEBUG, INFO, WARNING, ERROR, CRITICAL]',
               default="INFO")
+@click.option('--api',
+              '-a',
+              help='Skydive API: IP:PORT.'
+              'E.g: localhost:8082, 172.10.10.45:8082',
+              default="localhost:8082")
 @click.pass_context
-def maincli(ctx, at: str = None, log: str = "INFO"):
+def maincli(ctx,
+            at: str = None,
+            log: str = "INFO",
+            api: str = "localhost:8082"):
     """
     Sky Net Utility
     """
-    ctx.obj = SkyNetCtxt()
+    ctx.obj = SkyNetCtxt(api)
     if at:
         ctx.obj.set_option("at", at)
 

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# GLOBAL_VARS
+SCRIPT_FILE=`realpath -s $0`
+SCRIPTS=`dirname ${SCRIPT_FILE}`
+ROOT=`dirname ${SCRIPTS}`
+DEPLOYMENTS="${ROOT}/deployments"
+DEFAULT_WORKDIR=${ROOT}/workdir
+
+# Common ENV 
+WORKDIR="${SKYNET_WORKDIR:-${DEFAULT_WORKDIR}}"
+WORKDIR="${SKYNET_WORKDIR:-${DEFAULT_WORKDIR}}"
+RUNC_CMD="${RUNC_CMD:-docker}"
+
+error() {
+    echo "[error] $@"
+}
+
+info() {
+    echo "[info] $@"
+}
+
+common_init() {
+    # Common initialization
+    if [ ! -d "${WORKDIR}" ]; then
+        info "Workdir ${WORKDIR} does not exist, creating"
+        mkdir ${WORKDIR}
+    fi
+}
+
