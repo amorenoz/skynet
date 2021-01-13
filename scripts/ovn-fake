@@ -22,6 +22,12 @@ function get_ip() {
     ${RUNC_CMD} exec -it ${container} ip -4 -o addr show eth1 | awk '{print $4}' | cut -d "/" -f 1
 }
 
+function exec_on_all() {
+    for container in $(all_containers); do
+        ${RUNC_CMD} exec ${container} "$@"
+    done
+}
+
 function copy_to_all() {
     local local_file=$1
     local dest_file=$2
@@ -75,6 +81,7 @@ function install() {
     local central_ip=$(get_ip ${central_container})
 
     copy_to_all ${SKYDIVE_PATH} /usr/local/bin/skydive
+    exec_on_all mkdir -p /etc/skydive
     copy_to_all ${ROOTDIR}/config/ovn-fake-multinode/skydive.yml /etc/skydive/skydive.yml
 
     run_skydive analyzer ${central_container}
