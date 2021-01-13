@@ -27,7 +27,7 @@ for more information
 #### Building skydive
 Install skydive's building dependencies:
 
-        dnf install protobuf-compiler protobuf-devel libpcap-devel
+        dnf install protobuf-compiler protobuf-devel libpcap-devel libvirt
 
 A Makefile is provided to ease the compilation of skydive:
 
@@ -135,6 +135,9 @@ first build skydive for this specific target
 
     make clean; make ovn-fake-multinode
 
+### Start an ovn-fake-multinode cluster
+Follow the [ovn-fake-multinode bring up steps](https://github.com/ovn-org/ovn-fake-multinode#steps).
+
 ### Install skydive onto ovn-fake-multinode
 This will install skydive in `bin/skydive`. Then, install skydive into your
 multinode fake cluster using the convenience script:
@@ -152,7 +155,7 @@ The above script will create a network namespace called `ovnfake-int` that has a
 Download the requirements (if you haven't already) and run the tool:
 
     python -m venv venv; source venv/bin/activate; pip install -r requirements.txt; export PYTHONPATH=$PWD
-    ./bin/skynet --skydive 170.168.0.2:8082 summary
+    ./bin/skynet --api 170.168.0.2:8082 summary
 
 ### Uninstall skydive from ovn-fake-multinode
 To uninstall the current skydive binary from your cluster run:
