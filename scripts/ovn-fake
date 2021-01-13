@@ -58,7 +58,7 @@ function run_skydive() {
     local env=${@:-}
     local default_env="SKYDIVE_LOGGING_FILE_PATH=/tmp/skydive-${subcommand}.log SKYDIVE_LOGGING_BACKENDS=file"
 
-    ${RUNC_CMD} exec -it ${container} nohup sh -c "${default_env} ${env} skydive ${subcommand} --verbose 2>&1 > /tmp/skydive-${subcommand}.out &" </dev/null &>/dev/null
+    ${RUNC_CMD} exec -it ${container} nohup sh -c "${default_env} ${env} skydive ${subcommand} --verbose 2>&1 > /tmp/skydive-${subcommand}.out &" &>/dev/null
 }
 
 function add-int-namespace() {
