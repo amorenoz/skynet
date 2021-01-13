@@ -27,7 +27,7 @@ for more information
 #### Building skydive
 Install skydive's building dependencies:
 
-        dnf install protobuf-compiler protobuf-devel libpcap-devel
+        dnf install protobuf-compiler protobuf-devel libpcap-devel libvirt
 
 A Makefile is provided to ease the compilation of skydive:
 
