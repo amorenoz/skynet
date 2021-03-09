@@ -9,7 +9,7 @@ SCRIPTS=`dirname ${SCRIPT_FILE}`
 SKYDIVE_REV="${SKYDIVE_REV:-master}"
 SKYDIVE_REPO="${SKYDIVE_REPO:-default}"
 SKYDIVE_IMG=skydive:devel
-#K8S_VERSION=v1.14.10
+K8S_VERSION=v1.20.2
 
 usage(){
     echo "Usage: $0 [options] command [command options]"
@@ -46,9 +46,8 @@ do_create () {
 
     # Get Kind
     info "Getting KIND"
-    curl -Lo $WORKDIR/kind "https://kind.sigs.k8s.io/dl/v0.8.1/kind-$(uname)-amd64"
+    curl -Lo $WORKDIR/kind "https://kind.sigs.k8s.io/dl/v0.10.0/kind-$(uname)-amd64"
     chmod +x $WORKDIR/kind
-    export PATH="$PATH:$WORKDIR"
 
     info "Installing kubectl"
     which kubectl >/dev/null || (
@@ -157,6 +156,7 @@ done
 common_init
 
 export GOPATH=${WORKDIR}/go
+export PATH="$PATH:$WORKDIR"
 
 # Get command
 shift $((OPTIND -1))
