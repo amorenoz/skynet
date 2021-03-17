@@ -63,9 +63,11 @@ EOF
     sudo dnf install -y kubectl
     )
 
-    info "Opening port 11337 in the firewall"
-    sudo firewall-cmd --add-port=11337/tcp
-    sudo firewall-cmd --reload
+    if firewall-cmd -q --state; then
+        info "Opening port 11337 in the firewall"
+        sudo firewall-cmd -q --add-port=11337/tcp
+        sudo firewall-cmd -q --reload
+    fi
 
     info "Building ovn-k8s"
     go get github.com/ovn-org/ovn-kubernetes | true
