@@ -22,7 +22,11 @@ class Field:
                  trans: Callable = None,
                  key_name: str = None):
         self.name = name
-        self.key_name = key_name if key_name else name
+        if key_name is None:
+            _, _, last_name = name.rpartition('.')
+            self.key_name = last_name
+        else:
+            self.key_name = key_name
         self.trans = trans
 
     def value(self, data: Dict[str, Any]) -> Any:
