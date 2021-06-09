@@ -72,8 +72,8 @@ case $CMD in
         do_stop $@
         ;;
     restart)
-        do_start $@
         do_stop $@
+        do_start $@
         ;;
     forward)
         do_forward $@

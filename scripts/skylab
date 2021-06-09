@@ -68,8 +68,9 @@ EOF
     sudo firewall-cmd --reload
 
     info "Building ovn-k8s"
-    go get github.com/ovn-org/ovn-kubernetes | true
-    pushd $GOPATH/src/github.com/ovn-org/ovn-kubernetes
+    mkdir -p $GOPATH/src/github.com/ovn-org/
+    git clone https://github.com/ovn-org/ovn-kubernetes.git $OVN_KUBE_PATH
+    pushd $OVN_KUBE_PATH
       pushd go-controller
       make
       popd
@@ -98,7 +99,7 @@ do_apply() {
 
 do_start() {
     info "Starting kind + ovn"
-    pushd "$GOPATH/src/github.com/ovn-org/ovn-kubernetes/contrib"
+    pushd "$OVN_KUBE_PATH/contrib"
     (
         K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh
     )
@@ -121,11 +122,13 @@ do_start() {
 
 do_stop() {
     echo "Stopping the lab"
-    pushd "$GOPATH/src/github.com/ovn-org/ovn-kubernetes/contrib"
-    (
-        K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh --delete
-    )
-    popd
+    if [ -d  "$OVN_KUBE_PATH/contrib" ]; then
+        pushd "$OVN_KUBE_PATH/contrib"
+        (
+            K8S_VERSION=$K8S_VERSION KIND_INSTALL_INGRESS=true PATH="$PATH:$WORKDIR" ./kind.sh --delete
+        )
+        popd
+    fi
 }
 
 do_forward() {
@@ -157,6 +160,7 @@ common_init
 
 export GOPATH=${WORKDIR}/go
 export PATH="$PATH:$WORKDIR"
+OVN_KUBE_PATH=$GOPATH/src/github.com/ovn-org/ovn-kubernetes
 
 # Get command
 shift $((OPTIND -1))
